@@ -30,6 +30,14 @@ foreach (entry IN LISTS sample_entries)
       target_use_glew(${entry})
       target_setting(${entry})
       message(STATUS "Add target: ${entry}")
+      if (EXISTS "${sample_dir}/resource")
+        add_custom_command(
+          TARGET ${entry}
+          POST_BUILD
+          COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different ${sample_dir}/resource
+                  $<TARGET_FILE_DIR:${entry}>/resource
+          COMMENT "Copying resource to output directory")
+      endif ()
     else ()
       message(WARNING "No source files found in sample directory: ${entry}")
     endif ()
