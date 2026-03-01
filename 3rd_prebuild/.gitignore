@@ -1,0 +1,7 @@
+# Docs
+doc
+docs
+
+# Libraries
+!*.dll
+!*.lib
