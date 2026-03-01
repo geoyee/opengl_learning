@@ -13,6 +13,7 @@ endif ()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 include(UseGLFWithX64)
+include(UseGLEWithX64)
 include(CompilerSettings)
 
 file(
@@ -26,6 +27,7 @@ foreach (entry IN LISTS sample_entries)
     if (sample_sources)
       add_executable(${entry} ${sample_sources})
       target_use_glfw(${entry})
+      target_use_glew(${entry})
       target_setting(${entry})
       message(STATUS "Add target: ${entry}")
     else ()

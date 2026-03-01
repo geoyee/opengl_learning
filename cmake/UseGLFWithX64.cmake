@@ -52,11 +52,11 @@ function (target_use_glfw target)
         POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different "${dll_path}" $<TARGET_FILE_DIR:${target}>
         COMMENT "Copying glfw3.dll to output directory")
-      message(STATUS "Configured automatic copying of glfw3.dll to output directory")
+      # message(STATUS "Configured automatic copying of glfw3.dll to output directory")
     else ()
       message(WARNING "glfw3.dll not found: ${dll_path}, please copy manually")
     endif ()
   endif ()
 
-  message(STATUS "Target ${target} has been configured with GLFW (${lib_type})")
+  # message(STATUS "Target ${target} has been configured with GLFW (${lib_type})")
 endfunction ()
