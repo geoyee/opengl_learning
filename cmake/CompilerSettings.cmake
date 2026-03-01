@@ -2,15 +2,21 @@ function (target_setting target)
   get_target_property(target_type ${target} TYPE)
 
   if (target_type STREQUAL "INTERFACE_LIBRARY")
-    set(scope INTERFACE)
+    set(compile_scope INTERFACE)
+    set(link_scope INTERFACE)
   else ()
-    set(scope PRIVATE)
+    set(compile_scope PRIVATE)
+    if (target_type STREQUAL "EXECUTABLE" OR target_type STREQUAL "SHARED_LIBRARY")
+      set(link_scope PRIVATE)
+    else ()
+      set(link_scope INTERFACE)
+    endif ()
   endif ()
 
   if (MSVC)
     target_compile_options(
       ${target}
-      ${scope}
+      ${compile_scope}
       /utf-8
       /W4
       /EHsc
@@ -27,8 +33,8 @@ function (target_setting target)
       $<$<CONFIG:MinSizeRel>:/O1>)
 
     if (target_type STREQUAL "EXECUTABLE")
-      target_link_options(${target} PRIVATE $<$<CONFIG:Release>:/OPT:REF /OPT:ICF> $<$<CONFIG:RelWithDebInfo>:/OPT:REF
-                          /OPT:ICF>)
+      target_link_options(${target} ${link_scope} $<$<CONFIG:Release>:/OPT:REF /OPT:ICF>
+                          $<$<CONFIG:RelWithDebInfo>:/OPT:REF /OPT:ICF>)
     endif ()
   else ()
     include(CheckCXXCompilerFlag)
@@ -52,13 +58,13 @@ function (target_setting target)
       string(REPLACE "=" "_" fname "${fname}")
       check_cxx_compiler_flag(${flag} HAS_${fname})
       if (HAS_${fname})
-        target_compile_options(${target} ${scope} ${flag})
+        target_compile_options(${target} ${compile_scope} ${flag})
       endif ()
     endforeach ()
 
     target_compile_options(
       ${target}
-      ${scope}
+      ${compile_scope}
       $<$<CONFIG:Debug>:-O0
       -g
       -fsanitize=address,undefined
@@ -72,7 +78,7 @@ function (target_setting target)
       -DNDEBUG>
       ${ARG_FLAGS})
 
-    target_link_options(${target} ${scope} $<$<CONFIG:Debug>:-fsanitize=address,undefined>)
+    target_link_options(${target} ${link_scope} $<$<CONFIG:Debug>:-fsanitize=address,undefined>)
 
     if (target_type STREQUAL "SHARED_LIBRARY" OR target_type STREQUAL "STATIC_LIBRARY")
       set_target_properties(${target} PROPERTIES POSITION_INDEPENDENT_CODE ON)
@@ -84,6 +90,7 @@ function (target_setting target)
       ${target}
       PROPERTIES INTERPROCEDURAL_OPTIMIZATION_RELEASE ON
                  INTERPROCEDURAL_OPTIMIZATION_RELWITHDEBINFO ON
-                 INTERPROCEDURAL_OPTIMIZATION_MINSIZEREL ON)
+                 INTERPROCEDURAL_OPTIMIZATION_MINSIZEREL ON
+                 INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
   endif ()
 endfunction ()
