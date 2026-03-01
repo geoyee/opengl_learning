@@ -1,7 +1,22 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <fstream>
 #include <iostream>
+#include <string>
+#include <sstream>
 #include <vector>
+
+static std::string ParseShader(const std::string& file)
+{
+    std::ifstream fs(file);
+    std::ostringstream oss;
+    if (!fs.is_open())
+    {
+        return "";
+    }
+    oss << fs.rdbuf();
+    return oss.str();
+}
 
 static unsigned int CompilerShader(unsigned int type, const std::string& source)
 {
@@ -71,42 +86,41 @@ int main(void)
     /* Display the version of OpenGL */
     std::cout << glGetString(GL_VERSION) << std::endl;
 
-    float positions[6] = {-0.5f, -0.5f, 0.0f, 0.5f, 0.5f, -0.5f};
+    // clang-format off
+    float positions[] = {
+        -0.5f, -0.5f, // 0
+         0.5f, -0.5f, // 1
+         0.5f,  0.5f, // 2
+        -0.5f,  0.5f  // 3
+    };
+    unsigned int indices[] = {
+        0, 1, 2,
+        2, 3, 0
+    };
+    // clang-format on
 
     /* Create a buffer and bind data */
     unsigned int buffer;
     glGenBuffers(1, &buffer);
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW);
 
     /* How to parse the configuration data */
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), NULL);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), nullptr);
+
+    /* Create an index buffer and bind data */
+    unsigned int ibo;
+    glGenBuffers(1, &ibo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     /* Create shader */
-    std::string vertex_shader_src = R"(
-        #version 330 core
-
-        layout(location = 0) in vec4 position;
-
-        void main()
-        {
-            gl_Position = position;
-        }
-    )";
-    std::string fragment_shader_src = R"(
-        #version 330 core
-
-        layout(location = 0) out vec4 color;
-
-        void main()
-        {
-            color = vec4(1.0, 0.0, 0.0, 1.0);
-        }
-    )";
+    std::string shader_path = "resource/shaders/";
+    std::string vertex_shader_src = ParseShader(shader_path + "basic_vertex.glsl");
+    std::string fragment_shader_src = ParseShader(shader_path + "basic_fragment.glsl");
     unsigned int shader = CreateShader(vertex_shader_src, fragment_shader_src);
     glUseProgram(shader);
-
-    glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW);
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -114,7 +128,7 @@ int main(void)
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);

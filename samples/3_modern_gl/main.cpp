@@ -1,22 +1,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include <fstream>
 #include <iostream>
-#include <string>
-#include <sstream>
 #include <vector>
-
-static std::string ParseShader(const std::string& file)
-{
-    std::ifstream fs(file);
-    std::ostringstream oss;
-    if (!fs.is_open())
-    {
-        return "";
-    }
-    oss << fs.rdbuf();
-    return oss.str();
-}
 
 static unsigned int CompilerShader(unsigned int type, const std::string& source)
 {
@@ -51,8 +36,8 @@ static unsigned int CreateShader(const std::string& vertexShader, const std::str
     glLinkProgram(program);
     glValidateProgram(program);
     /* Generally not deleted, for ease of debugging and suchlike */
-    // glDeleteShader(vs);
-    // glDeleteShader(fs);
+    glDeleteShader(vs);
+    glDeleteShader(fs);
     return program;
 }
 
@@ -92,19 +77,35 @@ int main(void)
     unsigned int buffer;
     glGenBuffers(1, &buffer);
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW);
 
     /* How to parse the configuration data */
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), NULL);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), nullptr);
 
     /* Create shader */
-    std::string shader_path = "resource/shaders/";
-    std::string vertex_shader_src = ParseShader(shader_path + "basic_vertex.glsl");
-    std::string fragment_shader_src = ParseShader(shader_path + "basic_fragment.glsl");
+    std::string vertex_shader_src = R"(
+        #version 330 core
+
+        layout(location = 0) in vec4 position;
+
+        void main()
+        {
+            gl_Position = position;
+        }
+    )";
+    std::string fragment_shader_src = R"(
+        #version 330 core
+
+        layout(location = 0) out vec4 color;
+
+        void main()
+        {
+            color = vec4(1.0, 0.0, 0.0, 1.0);
+        }
+    )";
     unsigned int shader = CreateShader(vertex_shader_src, fragment_shader_src);
     glUseProgram(shader);
-
-    glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW);
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
