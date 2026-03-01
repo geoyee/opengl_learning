@@ -29,7 +29,7 @@ foreach (entry IN LISTS sample_entries)
       target_use_glfw(${entry})
       target_use_glew(${entry})
       target_setting(${entry})
-      message(STATUS "Add target: ${entry}")
+      message(STATUS "Add sample: ${entry}")
       if (EXISTS "${sample_dir}/resource")
         add_custom_command(
           TARGET ${entry}

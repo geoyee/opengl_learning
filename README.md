@@ -9,5 +9,4 @@ The environment is VS 2019 (x64). The code is located in the `samples` directory
 ``` shell
 mkdir build
 cmake -B build -S .
-
 ```
