@@ -23,7 +23,14 @@ file(
 foreach (entry IN LISTS sample_entries)
   set(sample_dir "${CMAKE_CURRENT_SOURCE_DIR}/samples/${entry}")
   if (IS_DIRECTORY "${sample_dir}")
-    file(GLOB_RECURSE sample_sources "${sample_dir}/*.cpp" "${sample_dir}/*.cxx" "${sample_dir}/*.cc")
+    file(
+      GLOB_RECURSE
+      sample_sources
+      "${sample_dir}/*.cpp"
+      "${sample_dir}/*.cxx"
+      "${sample_dir}/*.cc"
+      "${sample_dir}/*.hpp"
+      "${sample_dir}/*.h")
     if (sample_sources)
       add_executable(${entry} ${sample_sources})
       target_use_glfw(${entry})
