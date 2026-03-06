@@ -1,6 +1,7 @@
 #include "render.h"
 #include "vertex_buffer.h"
 #include "index_buffer.h"
+#include "vertex_array.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -114,19 +115,18 @@ int main(void)
         // clang-format on
 
         /* Create vertex array */
-        unsigned int vao;
-        GLCALL(glGenVertexArrays(1, &vao));
-        GLCALL(glBindVertexArray(vao));
+        VertexArrary va;
 
         /* Create a buffer and bind data */
-        VertexBuffer vbo(positions, sizeof(positions));
+        VertexBuffer vb(positions, sizeof(positions));
 
         /* How to parse the configuration data */
-        GLCALL(glEnableVertexAttribArray(0));
-        GLCALL(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), nullptr));
+        VertexBufferLayout layout;
+        layout.push<float>(2);
+        va.addBuffer(vb, layout);
 
         /* Create an index buffer and bind data */
-        IndexBuffer ibo(indices, 6);
+        IndexBuffer ib(indices, 6);
 
         /* Create shader */
         std::string shader_path = "resource/shaders/";
@@ -142,10 +142,10 @@ int main(void)
         GLCALL(glUniform4f(location, r, 0.5f, 0.8f, 1.0f));
 
         /* Unlink */
-        GLCALL(glBindVertexArray(0));
+        va.unbind();
         GLCALL(glUseProgram(0));
-        vbo.unbind();
-        ibo.unbind();
+        vb.unbind();
+        ib.unbind();
 
         /* Loop until the user closes the window */
         float increment = 0.05f;
@@ -158,7 +158,7 @@ int main(void)
             GLCALL(glUniform4f(location, r, 0.5f, 0.8f, 1.0f));
 
             /* Use vao instead of buffer and ibo */
-            GLCALL(glBindVertexArray(vao));
+            va.bind();
 
             GLCALL(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
