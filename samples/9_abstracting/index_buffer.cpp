@@ -1,5 +1,5 @@
 #include "index_buffer.h"
-#include "render.h"
+#include "error.h"
 
 IndexBuffer::IndexBuffer(const unsigned int *data, unsigned int count) : m_nCount(count)
 {

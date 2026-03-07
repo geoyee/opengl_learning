@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef __RENDER_H__
-#define __RENDER_H__
+#ifndef __ERROR_H__
+#define __ERROR_H__
 
 #include <GL/glew.h>
 
@@ -19,4 +19,4 @@
 void GLClearError();
 bool GLLogError(const char *func_name, const char *file, int line);
 
-#endif // !__RENDER_H__
+#endif // !__ERROR_H__

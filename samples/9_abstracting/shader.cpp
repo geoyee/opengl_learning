@@ -1,8 +1,9 @@
 #include "shader.h"
-#include "render.h"
+#include "error.h"
 
 #include <GL/glew.h>
 
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <sstream>

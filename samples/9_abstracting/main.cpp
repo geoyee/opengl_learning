@@ -1,8 +1,6 @@
-#include "render.h"
+#include "error.h"
 #include "vertex_buffer.h"
-#include "index_buffer.h"
-#include "vertex_array.h"
-#include "shader.h"
+#include "renderer.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -94,20 +92,17 @@ int main(void)
         vb.unbind();
         ib.unbind();
 
+        Renderer renderer;
+
         /* Loop until the user closes the window */
         float increment = 0.05f;
         while (!glfwWindowShouldClose(window))
         {
             /* Render here */
-            GLCALL(glClear(GL_COLOR_BUFFER_BIT));
-
+            renderer.clear();
             shader.bind();
             shader.setUniform4f("u_Color", r, 0.5f, 0.8f, 1.0f);
-
-            /* Use vao instead of buffer and ibo */
-            va.bind();
-
-            GLCALL(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+            renderer.draw(va, ib, shader);
 
             if (r > 1.0f || r < 0.0f)
             {
