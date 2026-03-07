@@ -60,7 +60,7 @@ template<>
 inline void VertexBufferLayout::push<unsigned char>(unsigned int count)
 {
     m_elements.push_back({GL_UNSIGNED_BYTE, count, GL_TRUE});
-    m_stride += count * sizeof(GLbyte);
+    m_stride += count * sizeof(GLubyte);
 }
 
 #endif // !__VERTEX_BUFFER_LAYOUT_HPP__

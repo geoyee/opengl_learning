@@ -1,6 +1,8 @@
 #include "vertex_array.h"
 #include "render.h"
 
+#pragma warning(disable : 4312)
+
 VertexArrary::VertexArrary()
 {
     GLCALL(glGenVertexArrays(1, &m_renderID));
@@ -37,7 +39,7 @@ void VertexArrary::addBuffer(const VertexBuffer& vb, const VertexBufferLayout& l
                                      element.type,
                                      element.normalized,
                                      layout.getStride(),
-                                     reinterpret_cast<const void *>(&offset)));
+                                     reinterpret_cast<const void *>(offset)));
         offset += element.count * sizeof(element.type);
     }
 }
