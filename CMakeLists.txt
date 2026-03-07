@@ -16,6 +16,8 @@ include(UseGLFWithX64)
 include(UseGLEWithX64)
 include(CompilerSettings)
 
+add_definitions(-DSTB_IMAGE_IMPLEMENTATION)
+
 file(
   GLOB sample_entries
   RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/samples"
@@ -32,7 +34,8 @@ foreach (entry IN LISTS sample_entries)
       "${sample_dir}/*.hpp"
       "${sample_dir}/*.h")
     if (sample_sources)
-      add_executable(${entry} ${sample_sources})
+      add_executable(${entry} ${sample_sources} ${stb_image_header})
+      target_include_directories(${entry} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/3rd/stb")
       target_use_glfw(${entry})
       target_use_glew(${entry})
       target_setting(${entry})
