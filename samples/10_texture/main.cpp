@@ -62,7 +62,7 @@ int main(void)
         };
         // clang-format on
 
-        /* Use blend*/
+        /* Use blend */
         GLCALL(glEnable(GL_BLEND));
         GLCALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
@@ -74,8 +74,8 @@ int main(void)
 
         /* How to parse the configuration data */
         VertexBufferLayout layout;
-        layout.push<float>(2);
-        layout.push<float>(2);
+        layout.push<float>(2); // XY
+        layout.push<float>(2); // UV
         va.addBuffer(vb, layout);
 
         /* Create an index buffer and bind data */
