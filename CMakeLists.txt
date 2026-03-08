@@ -18,6 +18,11 @@ include(CompilerSettings)
 
 add_definitions(-DSTB_IMAGE_IMPLEMENTATION)
 
+set(GLM_BUILD_LIBRARY
+    OFF
+    CACHE BOOL "Build dynamic/static library")
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/3rd/glm)
+
 file(
   GLOB sample_entries
   RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/samples"
@@ -36,6 +41,7 @@ foreach (entry IN LISTS sample_entries)
     if (sample_sources)
       add_executable(${entry} ${sample_sources} ${stb_image_header})
       target_include_directories(${entry} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/3rd/stb")
+      target_link_libraries(${entry} PRIVATE glm::glm-header-only)
       target_use_glfw(${entry})
       target_use_glew(${entry})
       target_setting(${entry})
