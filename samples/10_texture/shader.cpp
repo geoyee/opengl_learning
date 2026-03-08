@@ -52,6 +52,15 @@ void Shader::setUniform4f(const std::string& name, float f0, float f1, float f2,
     }
 }
 
+void Shader::setUniform1i(const std::string& name, int f0)
+{
+    int location = getUniformLocation(name);
+    if (location != -1)
+    {
+        GLCALL(glUniform1i(location, f0));
+    }
+}
+
 unsigned int Shader::CompilerShader(unsigned int type, const std::string& source)
 {
     GLCALL(unsigned int id = glCreateShader(type));
@@ -108,7 +117,7 @@ int Shader::getUniformLocation(const std::string& name)
         std::cerr << "invalid uniform named " << name << std::endl;
         return -1;
     }
-    m_locationCache.insert_or_assign(name, location);
+    m_locationCache[name] = location;
     return location;
 }
 

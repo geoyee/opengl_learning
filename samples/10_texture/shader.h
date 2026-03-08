@@ -20,6 +20,7 @@ public:
 
     /* Further abstraction can be extended */
     void setUniform4f(const std::string& name, float f0, float f1, float f2, float f3);
+    void setUniform1i(const std::string& name, int f0);
 
 private:
     static unsigned int CompilerShader(unsigned int type, const std::string& source);
@@ -30,7 +31,7 @@ private:
 
     unsigned int m_readerID;
     ShaderFiles m_files;
-    std::unordered_map<std::string, unsigned int> m_locationCache;
+    std::unordered_map<std::string, int> m_locationCache;
 };
 
 #endif // !__SHADER_H__

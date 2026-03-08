@@ -108,7 +108,7 @@ int Shader::getUniformLocation(const std::string& name)
         std::cerr << "invalid uniform named " << name << std::endl;
         return -1;
     }
-    m_locationCache.insert_or_assign(name, location);
+    m_locationCache[name] = location;
     return location;
 }
 

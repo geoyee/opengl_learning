@@ -30,7 +30,7 @@ private:
 
     unsigned int m_readerID;
     ShaderFiles m_files;
-    std::unordered_map<std::string, unsigned int> m_locationCache;
+    std::unordered_map<std::string, int> m_locationCache;
 };
 
 #endif // !__SHADER_H__

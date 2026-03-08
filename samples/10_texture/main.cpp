@@ -1,10 +1,10 @@
 #include "error.h"
 #include "vertex_buffer.h"
 #include "renderer.h"
+#include "texture.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include <stb_image.h>
 
 #include <iostream>
 
@@ -24,7 +24,7 @@ int main(void)
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+    window = glfwCreateWindow(480, 480, "Hello World", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -49,17 +49,22 @@ int main(void)
 
     {
         // clang-format off
+        /* XYUV */
         float positions[] = {
-            -0.5f, -0.5f, // 0
-             0.5f, -0.5f, // 1
-             0.5f,  0.5f, // 2
-            -0.5f,  0.5f  // 3
+            -0.5f, -0.5f, 0.0f, 0.0f, // 0
+             0.5f, -0.5f, 1.0f, 0.0f, // 1
+             0.5f,  0.5f, 1.0f, 1.0f, // 2
+            -0.5f,  0.5f, 0.0f, 1.0f  // 3
         };
         unsigned int indices[] = {
             0, 1, 2,
             2, 3, 0
         };
         // clang-format on
+
+        /* Use blend*/
+        GLCALL(glEnable(GL_BLEND));
+        GLCALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
         /* Create vertex array */
         VertexArrary va;
@@ -70,6 +75,7 @@ int main(void)
         /* How to parse the configuration data */
         VertexBufferLayout layout;
         layout.push<float>(2);
+        layout.push<float>(2);
         va.addBuffer(vb, layout);
 
         /* Create an index buffer and bind data */
@@ -78,14 +84,18 @@ int main(void)
         /* Create shader */
         std::string shader_path = "resource/shaders/";
         Shader shader({
-            {  GL_VERTEX_SHADER,     shader_path + "basic_vertex.glsl"},
-            {GL_FRAGMENT_SHADER, shader_path + "uniform_fragment.glsl"}
+            {  GL_VERTEX_SHADER,   shader_path + "texture_vertex.glsl"},
+            {GL_FRAGMENT_SHADER, shader_path + "texture_fragment.glsl"}
         });
         shader.bind();
 
+        /* Create texture */
+        std::string texture_path = "resource/textures/";
+        Texture texture(texture_path + "thinking_face.png");
+        texture.bind(0);
+
         /* Uniform */
-        float r = 0.0f;
-        shader.setUniform4f("u_Color", r, 0.5f, 0.8f, 1.0f);
+        shader.setUniform1i("u_Texture", 0);
 
         /* Unlink */
         va.unbind();
@@ -96,20 +106,12 @@ int main(void)
         Renderer renderer;
 
         /* Loop until the user closes the window */
-        float increment = 0.05f;
         while (!glfwWindowShouldClose(window))
         {
             /* Render here */
             renderer.clear();
             shader.bind();
-            shader.setUniform4f("u_Color", r, 0.5f, 0.8f, 1.0f);
             renderer.draw(va, ib, shader);
-
-            if (r > 1.0f || r < 0.0f)
-            {
-                increment *= -1;
-            }
-            r += increment;
 
             /* Swap front and back buffers */
             glfwSwapBuffers(window);
