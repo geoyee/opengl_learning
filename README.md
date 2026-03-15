@@ -12,3 +12,8 @@ The environment is VS 2019 (x64). The code is located in the `samples` directory
 mkdir build
 cmake -B build -S .
 ```
+
+## Resources
+
+- https://learnopengl-cn.github.io/
+- https://github.com/eug/awesome-opengl
