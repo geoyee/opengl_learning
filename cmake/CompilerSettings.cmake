@@ -32,9 +32,13 @@ function (target_setting target)
       /Zi>
       $<$<CONFIG:MinSizeRel>:/O1>)
 
-    if (target_type STREQUAL "EXECUTABLE")
-      target_link_options(${target} ${link_scope} $<$<CONFIG:Release>:/OPT:REF /OPT:ICF>
-                          $<$<CONFIG:RelWithDebInfo>:/OPT:REF /OPT:ICF>)
+    if (NOT target_type STREQUAL "INTERFACE_LIBRARY")
+      target_link_options(
+        ${target}
+        ${link_scope}
+        $<$<CONFIG:Debug>:/DEBUG>
+        $<$<AND:$<NOT:$<CONFIG:Debug>>,$<OR:$<STREQUAL:${target_type},EXECUTABLE>,$<STREQUAL:${target_type},SHARED_LIBRARY>>>:/OPT:REF
+        /OPT:ICF>)
     endif ()
   else ()
     include(CheckCXXCompilerFlag)
@@ -75,10 +79,11 @@ function (target_setting target)
       -g
       -DNDEBUG>
       $<$<CONFIG:MinSizeRel>:-Os
-      -DNDEBUG>
-      ${ARG_FLAGS})
+      -DNDEBUG>)
 
-    target_link_options(${target} ${link_scope} $<$<CONFIG:Debug>:-fsanitize=address,undefined>)
+    if (NOT target_type STREQUAL "INTERFACE_LIBRARY")
+      target_link_options(${target} ${link_scope} $<$<CONFIG:Debug>:-fsanitize=address,undefined>)
+    endif ()
 
     if (target_type STREQUAL "SHARED_LIBRARY" OR target_type STREQUAL "STATIC_LIBRARY")
       set_target_properties(${target} PROPERTIES POSITION_INDEPENDENT_CODE ON)

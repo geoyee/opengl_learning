@@ -26,7 +26,7 @@ int main(void)
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(480, 480, "Hello World", NULL, NULL);
+    window = glfwCreateWindow(960, 540, "Hello World", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -53,10 +53,10 @@ int main(void)
         // clang-format off
         /* XYUV */
         float positions[] = {
-            -0.5f, -0.5f, 0.0f, 0.0f, // 0
-             0.5f, -0.5f, 1.0f, 0.0f, // 1
-             0.5f,  0.5f, 1.0f, 1.0f, // 2
-            -0.5f,  0.5f, 0.0f, 1.0f  // 3
+            100.0f, 100.0f, 0.0f, 0.0f, // 0
+            200.0f, 100.0f, 1.0f, 0.0f, // 1
+            200.0f, 200.0f, 1.0f, 1.0f, // 2
+            100.0f, 200.0f, 0.0f, 1.0f  // 3
         };
         unsigned int indices[] = {
             0, 1, 2,
@@ -97,11 +97,14 @@ int main(void)
         texture.bind(0);
 
         /* Math */
-        glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
+        glm::mat4 proj = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
+        glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-100.0f, 0, 0));
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(200.0f, 200.0f, 0));
+        glm::mat4 mvp = proj * view * model;
 
         /* Uniform */
         shader.setUniform1i("u_Texture", 0);
-        shader.setUniformMat4f("u_MVP", proj);
+        shader.setUniformMat4f("u_MVP", mvp);
 
         /* Unlink */
         va.unbind();
