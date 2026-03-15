@@ -2,7 +2,9 @@
 
 > youtube: http://bit.ly/2lt7ccM
 > 
-> bilibili: https://www.bilibili.com/video/BV1MJ411u7Bc
+> bilibili:
+> - https://www.bilibili.com/video/BV1Ni4y1o7Au
+> - https://www.bilibili.com/video/BV1MJ411u7Bc
 
 The environment is VS 2019 (x64). The code is located in the `samples` directory, with dependencies already configured. No additional installation is required; simply execute CMake.
 
