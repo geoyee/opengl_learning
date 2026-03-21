@@ -70,6 +70,15 @@ void Shader::setUniformMat4f(const std::string& name, const glm::mat4& f0)
     }
 }
 
+void Shader::setUniform1iv(const std::string& name, unsigned int f0, int *f1)
+{
+    int location = getUniformLocation(name);
+    if (location != -1)
+    {
+        GLCALL(glUniform1iv(location, f0, f1));
+    }
+}
+
 unsigned int Shader::CompilerShader(unsigned int type, const std::string& source)
 {
     GLCALL(unsigned int id = glCreateShader(type));

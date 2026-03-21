@@ -55,17 +55,17 @@ int main(void)
 
     {
         // clang-format off
-        /* XYRGBA */
+        /* XYRGBAUV(TexID) */
         float positions[] = {
-            -50.0f, -50.0f, 0.18f,  0.6f, 0.96f, 1.0f, // 0
-             50.0f, -50.0f, 0.18f,  0.6f, 0.96f, 1.0f, // 1
-             50.0f,  50.0f, 0.18f,  0.6f, 0.96f, 1.0f, // 2
-            -50.0f,  50.0f, 0.18f,  0.6f, 0.96f, 1.0f, // 3
+            -50.0f, -50.0f, 0.18f,  0.6f, 0.96f, 1.0f, 0.0f, 0.0f, 0.0f, // 0
+             50.0f, -50.0f, 0.18f,  0.6f, 0.96f, 1.0f, 1.0f, 0.0f, 0.0f, // 1
+             50.0f,  50.0f, 0.18f,  0.6f, 0.96f, 1.0f, 1.0f, 1.0f, 0.0f, // 2
+            -50.0f,  50.0f, 0.18f,  0.6f, 0.96f, 1.0f, 0.0f, 1.0f, 0.0f, // 3
 
-             50.0f, -50.0f,  1.0f, 0.93f, 0.24f, 1.0f, // 4
-            150.0f, -50.0f,  1.0f, 0.93f, 0.24f, 1.0f, // 5
-            150.0f,  50.0f,  1.0f, 0.93f, 0.24f, 1.0f, // 6
-             50.0f,  50.0f,  1.0f, 0.93f, 0.24f, 1.0f  // 7
+             50.0f, -50.0f,  1.0f, 0.93f, 0.24f, 1.0f, 0.0f, 0.0f, 1.0f, // 4
+            150.0f, -50.0f,  1.0f, 0.93f, 0.24f, 1.0f, 1.0f, 0.0f, 1.0f, // 5
+            150.0f,  50.0f,  1.0f, 0.93f, 0.24f, 1.0f, 1.0f, 1.0f, 1.0f, // 6
+             50.0f,  50.0f,  1.0f, 0.93f, 0.24f, 1.0f, 0.0f, 1.0f, 1.0f  // 7
         };
         unsigned int indices[] = {
             0, 1, 2,
@@ -90,6 +90,8 @@ int main(void)
         VertexBufferLayout layout;
         layout.push<float>(2); // XY
         layout.push<float>(4); // RGBA
+        layout.push<float>(2); // UV
+        layout.push<float>(1); // TexID
         va.addBuffer(vb, layout);
 
         /* Create an index buffer and bind data */
@@ -105,15 +107,23 @@ int main(void)
 
         /* Create texture */
         std::string texture_path = "resource/textures/";
-        Texture texture(texture_path + "thinking_face.png");
-        texture.bind(0);
+        std::vector<std::string> texture_names = {"thinking_face.png", "face_with_raised_eyebrow.png"};
+        size_t texture_num = texture_names.size();
+        std::vector<Texture> textures;
+        textures.reserve(texture_num);
+        for (unsigned int i = 0; i < texture_num; ++i)
+        {
+            textures.emplace_back(texture_path + texture_names[i]);
+            textures.back().bind(i);
+        }
 
         /* Math */
         glm::mat4 proj = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
         glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
 
         /* Uniform */
-        shader.setUniform1i("u_Texture", 0);
+        int samplers[2] = {0, 1};
+        shader.setUniform1iv("u_Textures", 2, samplers);
 
         /* Unlink */
         va.unbind();
@@ -154,6 +164,12 @@ int main(void)
             ImGui_ImplOpenGL3_NewFrame();
             ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();
+
+            /* Rebinding is required, ImGui may modify the state of the texture unit */
+            for (unsigned int i = 0; i < texture_num; ++i)
+            {
+                textures[i].bind(i);
+            }
 
             glm::mat4 model = glm::translate(glm::mat4(1.0f), translation);
             glm::mat4 mvp = proj * view * model;
