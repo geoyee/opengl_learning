@@ -55,17 +55,17 @@ int main(void)
 
     {
         // clang-format off
-        /* XYUV */
+        /* XYRGBA */
         float positions[] = {
-            -50.0f, -50.0f, 0.0f, 0.0f, // 0
-             50.0f, -50.0f, 1.0f, 0.0f, // 1
-             50.0f,  50.0f, 1.0f, 1.0f, // 2
-            -50.0f,  50.0f, 0.0f, 1.0f, // 3
+            -50.0f, -50.0f, 0.18f,  0.6f, 0.96f, 1.0f, // 0
+             50.0f, -50.0f, 0.18f,  0.6f, 0.96f, 1.0f, // 1
+             50.0f,  50.0f, 0.18f,  0.6f, 0.96f, 1.0f, // 2
+            -50.0f,  50.0f, 0.18f,  0.6f, 0.96f, 1.0f, // 3
 
-             50.0f, -50.0f, 0.0f, 0.0f, // 4
-            150.0f, -50.0f, 1.0f, 0.0f, // 5
-            150.0f,  50.0f, 1.0f, 1.0f, // 6
-             50.0f,  50.0f, 0.0f, 1.0f  // 7
+             50.0f, -50.0f,  1.0f, 0.93f, 0.24f, 1.0f, // 4
+            150.0f, -50.0f,  1.0f, 0.93f, 0.24f, 1.0f, // 5
+            150.0f,  50.0f,  1.0f, 0.93f, 0.24f, 1.0f, // 6
+             50.0f,  50.0f,  1.0f, 0.93f, 0.24f, 1.0f  // 7
         };
         unsigned int indices[] = {
             0, 1, 2,
@@ -89,7 +89,7 @@ int main(void)
         /* How to parse the configuration data */
         VertexBufferLayout layout;
         layout.push<float>(2); // XY
-        layout.push<float>(2); // UV
+        layout.push<float>(4); // RGBA
         va.addBuffer(vb, layout);
 
         /* Create an index buffer and bind data */
@@ -98,8 +98,8 @@ int main(void)
         /* Create shader */
         std::string shader_path = "resource/shaders/";
         Shader shader({
-            {  GL_VERTEX_SHADER,      shader_path + "proj_vertex.glsl"},
-            {GL_FRAGMENT_SHADER, shader_path + "texture_fragment.glsl"}
+            {  GL_VERTEX_SHADER,   shader_path + "batch_vertex.glsl"},
+            {GL_FRAGMENT_SHADER, shader_path + "batch_fragment.glsl"}
         });
         shader.bind();
 
