@@ -94,14 +94,15 @@ int main()
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
 
-    // ******************************************************************************
-    /* Setting */
-    GLCALL(glEnable(GL_DEPTH_TEST));
-    GLCALL(glEnable(GL_BLEND));
-    GLCALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+    {
+        // ******************************************************************************
+        /* Setting */
+        GLCALL(glEnable(GL_DEPTH_TEST));
+        GLCALL(glEnable(GL_BLEND));
+        GLCALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
-    /* Create VBO, VIO, VAO */
-    // clang-format off
+        /* Create VBO, VIO, VAO */
+        // clang-format off
     float vertices[] = {
         -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, // 0
          0.5f, -0.5f, -0.5f, 1.0f, 0.0f, // 1
@@ -145,118 +146,119 @@ int main()
         glm::vec3( 1.5f,  0.2f,  -1.5f),
         glm::vec3(-1.3f,  1.0f,  -1.5f)
     };
-    // clang-format on
+        // clang-format on
 
-    VertexArrary va;
-    VertexBuffer vb(vertices, sizeof(vertices));
-    VertexBufferLayout layout;
-    layout.push<float>(3); // XYZ
-    layout.push<float>(2); // UV
-    va.addBuffer(vb, layout);
+        VertexArrary va;
+        VertexBuffer vb(vertices, sizeof(vertices));
+        VertexBufferLayout layout;
+        layout.push<float>(3); // XYZ
+        layout.push<float>(2); // UV
+        va.addBuffer(vb, layout);
 
-    /* Generate index */
-    unsigned int indices[36];
-    unsigned int offset = 0;
-    for (unsigned int i = 0; i < 36; i += 6)
-    {
-        indices[i + 0] = 0 + offset;
-        indices[i + 1] = 1 + offset;
-        indices[i + 2] = 2 + offset;
-        indices[i + 3] = 2 + offset;
-        indices[i + 4] = 3 + offset;
-        indices[i + 5] = 0 + offset;
-        offset += 4;
-    }
-    IndexBuffer ib(indices, sizeof(indices));
+        /* Generate index */
+        unsigned int indices[36];
+        unsigned int offset = 0;
+        for (unsigned int i = 0; i < 36; i += 6)
+        {
+            indices[i + 0] = 0 + offset;
+            indices[i + 1] = 1 + offset;
+            indices[i + 2] = 2 + offset;
+            indices[i + 3] = 2 + offset;
+            indices[i + 4] = 3 + offset;
+            indices[i + 5] = 0 + offset;
+            offset += 4;
+        }
+        IndexBuffer ib(indices, sizeof(indices));
 
-    /* Create shader */
-    std::string shader_path = "resource/shaders/";
-    Shader shader({
-        {  GL_VERTEX_SHADER,   shader_path + "merge_vertex.glsl"},
-        {GL_FRAGMENT_SHADER, shader_path + "merge_fragment.glsl"}
-    });
-    shader.bind();
-
-    /* Create texture */
-    std::string texture_path = "resource/textures/";
-    std::vector<std::string> texture_names = {"thinking_face.png", "southeast.png"};
-    size_t texture_num = texture_names.size();
-    std::vector<Texture> textures;
-    textures.reserve(texture_num);
-    for (unsigned int i = 0; i < texture_num; ++i)
-    {
-        textures.emplace_back(texture_path + texture_names[i]);
-        textures.back().bind(i);
-    }
-
-    /* Uniform */
-    int samplers[2] = {0, 1};
-    shader.setUniform1iv("u_Textures", 2, samplers);
-
-    vb.unbind();
-    va.unbind();
-    shader.unbind();
-    // ******************************************************************************
-
-    // ---------- Main Loop ----------
-    Renderer renderer;
-    GLCALL(const GLubyte *gl_version = glGetString(GL_VERSION));
-
-    while (!glfwWindowShouldClose(window))
-    {
-        float currentFrame = static_cast<float>(glfwGetTime());
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
-
-        processInput(window);
-
-        // Render here
-        renderer.clear();
-
-        // Start ImGui frame
-        ImGui_ImplGlfw_NewFrame();
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui::NewFrame();
-
+        /* Create shader */
+        std::string shader_path = "resource/shaders/";
+        Shader shader({
+            {  GL_VERTEX_SHADER,   shader_path + "merge_vertex.glsl"},
+            {GL_FRAGMENT_SHADER, shader_path + "merge_fragment.glsl"}
+        });
         shader.bind();
 
-        // ******************************************************************************
-        /* Rebinding is required, ImGui may modify the state of the texture unit */
+        /* Create texture */
+        std::string texture_path = "resource/textures/";
+        std::vector<std::string> texture_names = {"thinking_face.png", "southeast.png"};
+        size_t texture_num = texture_names.size();
+        std::vector<Texture> textures;
+        textures.reserve(texture_num);
         for (unsigned int i = 0; i < texture_num; ++i)
         {
-            textures[i].bind(i);
+            textures.emplace_back(texture_path + texture_names[i]);
+            textures.back().bind(i);
         }
 
-        glm::mat4 proj =
-            glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-        glm::mat4 view = camera.GetViewMatrix();
-        for (unsigned int i = 0; i < 10; i++)
-        {
-            glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-            model = glm::translate(model, cubePositions[i]);
-            float angle = 20.0f * i;
-            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-            glm::mat4 mvp = proj * view * model;
-            shader.setUniformMat4f("u_MVP", mvp);
-            renderer.draw(va, ib, shader);
-        }
+        /* Uniform */
+        int samplers[2] = {0, 1};
+        shader.setUniform1iv("u_Textures", 2, samplers);
+
+        vb.unbind();
+        va.unbind();
+        shader.unbind();
         // ******************************************************************************
 
-        // UI
-        ImGui::Begin("Debug");
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-        ImGui::Text("GL version: %s", gl_version);
-        ImGui::End();
+        // ---------- Main Loop ----------
+        Renderer renderer;
+        GLCALL(const GLubyte *gl_version = glGetString(GL_VERSION));
 
-        // Render ImGui
-        ImGui::Render();
+        while (!glfwWindowShouldClose(window))
+        {
+            float currentFrame = static_cast<float>(glfwGetTime());
+            deltaTime = currentFrame - lastFrame;
+            lastFrame = currentFrame;
 
-        // OpenGL rendering
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+            processInput(window);
 
-        glfwSwapBuffers(window);
-        glfwPollEvents();
-    }
+            // Render here
+            renderer.clear();
+
+            // Start ImGui frame
+            ImGui_ImplGlfw_NewFrame();
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui::NewFrame();
+
+            shader.bind();
+
+            // ******************************************************************************
+            /* Rebinding is required, ImGui may modify the state of the texture unit */
+            for (unsigned int i = 0; i < texture_num; ++i)
+            {
+                textures[i].bind(i);
+            }
+
+            glm::mat4 proj =
+                glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+            glm::mat4 view = camera.GetViewMatrix();
+            for (unsigned int i = 0; i < 10; i++)
+            {
+                glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+                model = glm::translate(model, cubePositions[i]);
+                float angle = 20.0f * i;
+                model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+                glm::mat4 mvp = proj * view * model;
+                shader.setUniformMat4f("u_MVP", mvp);
+                renderer.draw(va, ib, shader);
+            }
+            // ******************************************************************************
+
+            // UI
+            ImGui::Begin("Debug");
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+            ImGui::Text("GL version: %s", gl_version);
+            ImGui::End();
+
+            // Render ImGui
+            ImGui::Render();
+
+            // OpenGL rendering
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+            glfwSwapBuffers(window);
+            glfwPollEvents();
+        }
+    } // The purpose of this block is to ensure that resources are released in the correct order and that the programme exits correctly when the window is closed
 
     // ---------- Cleanup ----------
     ImGui_ImplOpenGL3_Shutdown();
