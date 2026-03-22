@@ -11,8 +11,45 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
+#include <array>
 #include <iostream>
 #include <vector>
+
+/* Struct of Vertex */
+struct Vertex
+{
+    glm::vec3 position;  // XYZ
+    glm::vec4 color;     // RGBA
+    glm::vec2 texCoords; // UV
+    float texID;         // TexID
+};
+
+static std::array<Vertex, 4> CreateQuad(
+    float x, float y, float texID, float r = 1.0f, float g = 1.0f, float b = 1.0f, float a = 1.0f)
+{
+    float size = 100.0f;
+    Vertex v0;
+    v0.position = {x, y, 0.0f};
+    v0.color = {r, g, b, a};
+    v0.texCoords = {0.0f, 0.0f};
+    v0.texID = texID;
+    Vertex v1;
+    v1.position = {x + size, y, 0.0f};
+    v1.color = {r, g, b, a};
+    v1.texCoords = {1.0f, 0.0f};
+    v1.texID = texID;
+    Vertex v2;
+    v2.position = {x + size, y + size, 0.0f};
+    v2.color = {r, g, b, a};
+    v2.texCoords = {1.0f, 1.0f};
+    v2.texID = texID;
+    Vertex v3;
+    v3.position = {x, y + size, 0.0f};
+    v3.color = {r, g, b, a};
+    v3.texCoords = {0.0f, 1.0f};
+    v3.texID = texID;
+    return {v0, v1, v2, v3};
+};
 
 int main(void)
 {
@@ -55,18 +92,6 @@ int main(void)
 
     {
         // clang-format off
-        /* XYRGBAUV(TexID) */
-        float positions[] = {
-            -50.0f, -50.0f, 0.18f,  0.6f, 0.96f, 1.0f, 0.0f, 0.0f, 0.0f, // 0
-             50.0f, -50.0f, 0.18f,  0.6f, 0.96f, 1.0f, 1.0f, 0.0f, 0.0f, // 1
-             50.0f,  50.0f, 0.18f,  0.6f, 0.96f, 1.0f, 1.0f, 1.0f, 0.0f, // 2
-            -50.0f,  50.0f, 0.18f,  0.6f, 0.96f, 1.0f, 0.0f, 1.0f, 0.0f, // 3
-
-             50.0f, -50.0f,  1.0f, 0.93f, 0.24f, 1.0f, 0.0f, 0.0f, 1.0f, // 4
-            150.0f, -50.0f,  1.0f, 0.93f, 0.24f, 1.0f, 1.0f, 0.0f, 1.0f, // 5
-            150.0f,  50.0f,  1.0f, 0.93f, 0.24f, 1.0f, 1.0f, 1.0f, 1.0f, // 6
-             50.0f,  50.0f,  1.0f, 0.93f, 0.24f, 1.0f, 0.0f, 1.0f, 1.0f  // 7
-        };
         unsigned int indices[] = {
             0, 1, 2,
             2, 3, 0,
@@ -84,11 +109,12 @@ int main(void)
         VertexArrary va;
 
         /* Create a buffer and bind data */
-        VertexBuffer vb(positions, sizeof(positions));
+        constexpr int VERTEX_NUM = 1000;
+        VertexBuffer vb(sizeof(Vertex) * VERTEX_NUM);
 
         /* How to parse the configuration data */
         VertexBufferLayout layout;
-        layout.push<float>(2); // XY
+        layout.push<float>(3); // XYZ
         layout.push<float>(4); // RGBA
         layout.push<float>(2); // UV
         layout.push<float>(1); // TexID
@@ -159,6 +185,14 @@ int main(void)
         {
             /* Render here */
             renderer.clear();
+
+            /* Set dynamic vertex buffer */
+            auto q0 = CreateQuad(-50.0f, -50.0f, 0.0f);
+            auto q1 = CreateQuad(50.0f, -50.0f, 1.0f);
+            Vertex vertices[8];
+            memcpy(vertices, q0.data(), q0.size() * sizeof(Vertex));
+            memcpy(vertices + q0.size(), q1.data(), q1.size() * sizeof(Vertex));
+            vb.bind(vertices, sizeof(vertices));
 
             /* Start the Dear ImGui frame */
             ImGui_ImplOpenGL3_NewFrame();
