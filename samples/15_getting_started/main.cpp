@@ -100,50 +100,38 @@ int main()
     GLCALL(glEnable(GL_BLEND));
     GLCALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
-    /* Create VBO, VAO */
+    /* Create VBO, VIO, VAO */
     // clang-format off
     float vertices[] = {
-        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
-         0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f, 0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, // 0
+         0.5f, -0.5f, -0.5f, 1.0f, 0.0f, // 1
+         0.5f,  0.5f, -0.5f, 1.0f, 1.0f, // 2
+        -0.5f,  0.5f, -0.5f, 0.0f, 1.0f, // 3
 
-        -0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
-         0.5f, -0.5f,  0.5f, 1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f, 1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f, 1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f, 0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f, 0.0f, 0.0f, // 4
+         0.5f, -0.5f,  0.5f, 1.0f, 0.0f, // 5
+         0.5f,  0.5f,  0.5f, 1.0f, 1.0f, // 6
+        -0.5f,  0.5f,  0.5f, 0.0f, 1.0f, // 7
 
-        -0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f, 1.0f, 0.0f, // 8
+        -0.5f,  0.5f, -0.5f, 1.0f, 1.0f, // 9
+        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, // 10
+        -0.5f, -0.5f,  0.5f, 0.0f, 0.0f, // 11
 
-         0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
-         0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-         0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
-         0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f, 1.0f, 0.0f, // 12
+         0.5f,  0.5f, -0.5f, 1.0f, 1.0f, // 13
+         0.5f, -0.5f, -0.5f, 0.0f, 1.0f, // 14
+         0.5f, -0.5f,  0.5f, 0.0f, 0.0f, // 15
 
-        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f, 1.0f, 1.0f,
-         0.5f, -0.5f,  0.5f, 1.0f, 0.0f,
-         0.5f, -0.5f,  0.5f, 1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, // 16
+         0.5f, -0.5f, -0.5f, 1.0f, 1.0f, // 17
+         0.5f, -0.5f,  0.5f, 1.0f, 0.0f, // 18
+        -0.5f, -0.5f,  0.5f, 0.0f, 0.0f, // 19
 
-        -0.5f,  0.5f, -0.5f, 0.0f, 1.0f,
-         0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f, 0.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f, 0.0f, 1.0f
+        -0.5f,  0.5f, -0.5f, 0.0f, 1.0f, // 20 
+         0.5f,  0.5f, -0.5f, 1.0f, 1.0f, // 21 
+         0.5f,  0.5f,  0.5f, 1.0f, 0.0f, // 22 
+        -0.5f,  0.5f,  0.5f, 0.0f, 0.0f  // 23
     };
     glm::vec3 cubePositions[] = {
         glm::vec3( 0.0f,  0.0f,   0.0f),
@@ -165,6 +153,21 @@ int main()
     layout.push<float>(3); // XYZ
     layout.push<float>(2); // UV
     va.addBuffer(vb, layout);
+
+    /* Generate index */
+    unsigned int indices[36];
+    unsigned int offset = 0;
+    for (unsigned int i = 0; i < 36; i += 6)
+    {
+        indices[i + 0] = 0 + offset;
+        indices[i + 1] = 1 + offset;
+        indices[i + 2] = 2 + offset;
+        indices[i + 3] = 2 + offset;
+        indices[i + 4] = 3 + offset;
+        indices[i + 5] = 0 + offset;
+        offset += 4;
+    }
+    IndexBuffer ib(indices, sizeof(indices));
 
     /* Create shader */
     std::string shader_path = "resource/shaders/";
@@ -235,7 +238,7 @@ int main()
             model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
             glm::mat4 mvp = proj * view * model;
             shader.setUniformMat4f("u_MVP", mvp);
-            renderer.draw(va, 36, shader);
+            renderer.draw(va, ib, shader);
         }
         // ******************************************************************************
 
