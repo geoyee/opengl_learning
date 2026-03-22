@@ -24,32 +24,38 @@ struct Vertex
     float texID;         // TexID
 };
 
-static std::array<Vertex, 4> CreateQuad(
-    float x, float y, float texID, float r = 1.0f, float g = 1.0f, float b = 1.0f, float a = 1.0f)
+static Vertex *CreateQuad(
+    Vertex *target, float x, float y, float texID, float r = 1.0f, float g = 1.0f, float b = 1.0f, float a = 1.0f)
 {
     float size = 100.0f;
-    Vertex v0;
-    v0.position = {x, y, 0.0f};
-    v0.color = {r, g, b, a};
-    v0.texCoords = {0.0f, 0.0f};
-    v0.texID = texID;
-    Vertex v1;
-    v1.position = {x + size, y, 0.0f};
-    v1.color = {r, g, b, a};
-    v1.texCoords = {1.0f, 0.0f};
-    v1.texID = texID;
-    Vertex v2;
-    v2.position = {x + size, y + size, 0.0f};
-    v2.color = {r, g, b, a};
-    v2.texCoords = {1.0f, 1.0f};
-    v2.texID = texID;
-    Vertex v3;
-    v3.position = {x, y + size, 0.0f};
-    v3.color = {r, g, b, a};
-    v3.texCoords = {0.0f, 1.0f};
-    v3.texID = texID;
-    return {v0, v1, v2, v3};
+
+    target->position = {x, y, 0.0f};
+    target->color = {r, g, b, a};
+    target->texCoords = {0.0f, 0.0f};
+    target->texID = texID;
+    target++;
+    target->position = {x + size, y, 0.0f};
+    target->color = {r, g, b, a};
+    target->texCoords = {1.0f, 0.0f};
+    target->texID = texID;
+    target++;
+    target->position = {x + size, y + size, 0.0f};
+    target->color = {r, g, b, a};
+    target->texCoords = {1.0f, 1.0f};
+    target->texID = texID;
+    target++;
+    target->position = {x, y + size, 0.0f};
+    target->color = {r, g, b, a};
+    target->texCoords = {0.0f, 1.0f};
+    target->texID = texID;
+    target++;
+    return target;
 };
+
+/* Some constants */
+static constexpr size_t MAX_QUAD_COUNT = 1000;
+static constexpr size_t MAX_VERTEX_COUNT = MAX_QUAD_COUNT * 4;
+static constexpr size_t MAX_INDEX_COUNT = MAX_QUAD_COUNT * 6;
 
 int main(void)
 {
@@ -91,15 +97,19 @@ int main(void)
     std::cout << gl_version << std::endl;
 
     {
-        // clang-format off
-        unsigned int indices[] = {
-            0, 1, 2,
-            2, 3, 0,
-
-            4, 5, 6,
-            6, 7, 4,
-        };
-        // clang-format on
+        // Dynamic index
+        unsigned int indices[MAX_INDEX_COUNT];
+        unsigned int offset = 0;
+        for (unsigned int i = 0; i < MAX_INDEX_COUNT; i += 6)
+        {
+            indices[i + 0] = 0 + offset;
+            indices[i + 1] = 1 + offset;
+            indices[i + 2] = 2 + offset;
+            indices[i + 3] = 2 + offset;
+            indices[i + 4] = 3 + offset;
+            indices[i + 5] = 0 + offset;
+            offset += 4;
+        }
 
         /* Use blend */
         GLCALL(glEnable(GL_BLEND));
@@ -109,8 +119,7 @@ int main(void)
         VertexArrary va;
 
         /* Create a buffer and bind data */
-        constexpr int VERTEX_NUM = 1000;
-        VertexBuffer vb(sizeof(Vertex) * VERTEX_NUM);
+        VertexBuffer vb(sizeof(Vertex) * MAX_VERTEX_COUNT);
 
         /* How to parse the configuration data */
         VertexBufferLayout layout;
@@ -121,7 +130,7 @@ int main(void)
         va.addBuffer(vb, layout);
 
         /* Create an index buffer and bind data */
-        IndexBuffer ib(indices, 12);
+        IndexBuffer ib(indices, MAX_INDEX_COUNT);
 
         /* Create shader */
         std::string shader_path = "resource/shaders/";
@@ -144,7 +153,7 @@ int main(void)
         }
 
         /* Math */
-        glm::mat4 proj = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
+        glm::mat4 proj = glm::ortho(0.0f, 1000.0f, 0.0f, 600.0f, -1.0f, 1.0f);
         glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
 
         /* Uniform */
@@ -178,7 +187,7 @@ int main(void)
 #endif
         }
 
-        glm::vec3 translation(200.0f, 200.0f, 0);
+        glm::vec3 translation(0, 0, 0);
 
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window))
@@ -187,12 +196,16 @@ int main(void)
             renderer.clear();
 
             /* Set dynamic vertex buffer */
-            auto q0 = CreateQuad(-50.0f, -50.0f, 0.0f);
-            auto q1 = CreateQuad(50.0f, -50.0f, 1.0f);
-            Vertex vertices[8];
-            memcpy(vertices, q0.data(), q0.size() * sizeof(Vertex));
-            memcpy(vertices + q0.size(), q1.data(), q1.size() * sizeof(Vertex));
-            vb.bind(vertices, sizeof(vertices));
+            std::array<Vertex, MAX_VERTEX_COUNT> vertices;
+            Vertex *buffer = vertices.data();
+            for (int y = 0; y < 6; ++y)
+            {
+                for (int x = 0; x < 10; ++x)
+                {
+                    buffer = CreateQuad(buffer, 100.0f * x, 100.0f * y, static_cast<float>((x + y) % 2));
+                }
+            }
+            vb.bind(vertices.data(), static_cast<unsigned int>(vertices.size() * sizeof(Vertex)));
 
             /* Start the Dear ImGui frame */
             ImGui_ImplOpenGL3_NewFrame();
@@ -214,7 +227,7 @@ int main(void)
 
             /* UI of ImGui */
             ImGui::Begin("Debug");
-            ImGui::SliderFloat3("Translation", &translation.x, 0.0f, 960.0f);
+            ImGui::SliderFloat3("Translation", &translation.x, 0.0f, 1000.0f);
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
             ImGui::End();
 
