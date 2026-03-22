@@ -1,5 +1,7 @@
 #include "camera.h"
 
+#include <iostream>
+
 Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch)
     : Front(glm::vec3(0.0f, 0.0f, -1.0f))
     , MovementSpeed(DEFAULT_SPEED)
@@ -34,21 +36,20 @@ glm::mat4 Camera::GetViewMatrix()
 void Camera::ProcessKeyboard(Movement direction, float deltaTime)
 {
     float velocity = MovementSpeed * deltaTime;
-    if (direction == Movement::FORWARD)
+    switch (direction)
     {
-        Position += Front * velocity;
-    }
-    if (direction == Movement::BACKWARD)
-    {
-        Position -= Front * velocity;
-    }
-    if (direction == Movement::LEFT)
-    {
-        Position -= Right * velocity;
-    }
-    if (direction == Movement::RIGHT)
-    {
-        Position += Right * velocity;
+        case Movement::FORWARD :
+            Position += Front * velocity;
+            break;
+        case Movement::BACKWARD :
+            Position -= Front * velocity;
+            break;
+        case Movement::LEFT :
+            Position -= Right * velocity;
+            break;
+        case Movement::RIGHT :
+            Position += Right * velocity;
+            break;
     }
 }
 
@@ -61,14 +62,7 @@ void Camera::ProcessMouseMovement(float xoffset, float yoffset, GLboolean constr
     // make sure that when pitch is out of bounds, screen doesn't get flipped
     if (constrainPitch)
     {
-        if (Pitch > 89.0f)
-        {
-            Pitch = 89.0f;
-        }
-        if (Pitch < -89.0f)
-        {
-            Pitch = -89.0f;
-        }
+        Pitch = std::min(std::max(Pitch, -89.0f), 89.0f);
     }
     // update Front, Right and Up Vectors using the updated Euler angles
     updateCameraVectors();
@@ -77,6 +71,7 @@ void Camera::ProcessMouseMovement(float xoffset, float yoffset, GLboolean constr
 void Camera::ProcessMouseScroll(float yoffset)
 {
     Zoom -= static_cast<float>(yoffset);
+    Zoom = std::min(std::max(Zoom, 1.0f), 120.0f);
 }
 
 void Camera::updateCameraVectors()

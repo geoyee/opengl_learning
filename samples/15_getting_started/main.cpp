@@ -245,8 +245,9 @@ int main()
 
             // UI
             ImGui::Begin("Debug");
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
             ImGui::Text("GL version: %s", gl_version);
+            ImGui::Text("Zoom: %.0f", camera.Zoom);
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
             ImGui::End();
 
             // Render ImGui
