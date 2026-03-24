@@ -21,9 +21,10 @@ void mouse_callback(GLFWwindow *window, double xpos, double ypos);
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 
 // Settings
-constexpr unsigned int SCR_WIDTH = 800;
-constexpr unsigned int SCR_HEIGHT = 600;
+constexpr unsigned int SCR_WIDTH = 1200;
+constexpr unsigned int SCR_HEIGHT = 900;
 std::string shader_path = "resource/shaders/";
+bool mouse_ctr = true;
 
 // Camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
@@ -111,41 +112,42 @@ int main()
         /* Create VBO, VIO, VAO */
         // clang-format off
         float vertices[] = {
-            -0.5f, -0.5f, -0.5f, // 0
-             0.5f, -0.5f, -0.5f, // 1
-             0.5f,  0.5f, -0.5f, // 2
-            -0.5f,  0.5f, -0.5f, // 3
+            -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, // 0
+             0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, // 1
+             0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, // 2
+            -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, // 3
 
-            -0.5f, -0.5f,  0.5f, // 4
-             0.5f, -0.5f,  0.5f, // 5
-             0.5f,  0.5f,  0.5f, // 6
-            -0.5f,  0.5f,  0.5f, // 7
+            -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, // 4
+             0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, // 5
+             0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, // 6
+            -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, // 7
 
-            -0.5f,  0.5f,  0.5f, // 8
-            -0.5f,  0.5f, -0.5f, // 9
-            -0.5f, -0.5f, -0.5f, // 10
-            -0.5f, -0.5f,  0.5f, // 11
+            -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, // 8
+            -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f, // 9
+            -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, // 10
+            -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f, // 11
 
-             0.5f,  0.5f,  0.5f, // 12
-             0.5f,  0.5f, -0.5f, // 13
-             0.5f, -0.5f, -0.5f, // 14
-             0.5f, -0.5f,  0.5f, // 15
+             0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, // 12
+             0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f, // 13
+             0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, // 14
+             0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f, // 15
 
-            -0.5f, -0.5f, -0.5f, // 16
-             0.5f, -0.5f, -0.5f, // 17
-             0.5f, -0.5f,  0.5f, // 18
-            -0.5f, -0.5f,  0.5f, // 19
+            -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, // 16
+             0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, // 17
+             0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, // 18
+            -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, // 19
 
-            -0.5f,  0.5f, -0.5f, // 20
-             0.5f,  0.5f, -0.5f, // 21
-             0.5f,  0.5f,  0.5f, // 22
-            -0.5f,  0.5f,  0.5f, // 23
+            -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, // 20
+             0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, // 21
+             0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, // 22
+            -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, // 23
         };
         // clang-format on
 
         VertexBuffer vb(vertices, sizeof(vertices));
         VertexBufferLayout layout;
         layout.push<float>(3); // XYZ
+        layout.push<float>(3); // Normal
 
         unsigned int indices[36];
         unsigned int offset = 0;
@@ -182,6 +184,12 @@ int main()
         Renderer renderer;
         GLCALL(const GLubyte *gl_version = glGetString(GL_VERSION));
 
+        float ambientStrength = 0.1f;
+        float specularStrength = 0.5f;
+        int shininess = 32;
+        glm::vec3 objectColor(1.0f, 0.5f, 0.31f);
+        glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
+
         while (!glfwWindowShouldClose(window))
         {
             float currentFrame = static_cast<float>(glfwGetTime());
@@ -203,20 +211,30 @@ int main()
                 glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
             glm::mat4 view = camera.GetViewMatrix();
 
+            lightPos.x = 1.0f + (float)std::sin(glfwGetTime()) * 2.0f;
+            lightPos.y = (float)std::sin(glfwGetTime() / 2.0f) * 1.0f;
+
             cubeShader.bind();
-            cubeShader.setUniform3f("u_objectColor", 1.0f, 0.5f, 0.31f);
-            cubeShader.setUniform3f("u_lightColor", 1.0f, 1.0f, 1.0f);
+            cubeShader.setUniform3f("u_ObjectColor", objectColor);
+            cubeShader.setUniform3f("u_LightColor", lightColor);
+            cubeShader.setUniform3f("u_LightPos", lightPos);
+            cubeShader.setUniform3f("u_ViewPos", camera.Position);
+            cubeShader.setUniform1f("u_AmbientStrength", ambientStrength);
+            cubeShader.setUniform1f("u_SpecularStrength", specularStrength);
+            cubeShader.setUniform1i("u_Shininess", shininess);
             glm::mat4 cubeModel = glm::mat4(1.0f);
-            glm::mat4 cubeMvp = proj * view * cubeModel;
-            cubeShader.setUniformMat4f("u_MVP", cubeMvp);
+            cubeShader.setUniformMat4f("u_Model", cubeModel);
+            cubeShader.setUniformMat4f("u_View", view);
+            cubeShader.setUniformMat4f("u_Proj", proj);
             renderer.draw(cubeVa, ib, cubeShader);
 
             lightShader.bind();
             glm::mat4 lightModel = glm::mat4(1.0f);
             lightModel = glm::translate(lightModel, lightPos);
             lightModel = glm::scale(lightModel, glm::vec3(0.2f));
-            glm::mat4 lightMvp = proj * view * lightModel;
-            lightShader.setUniformMat4f("u_MVP", lightMvp);
+            lightShader.setUniformMat4f("u_Model", lightModel);
+            lightShader.setUniformMat4f("u_View", view);
+            lightShader.setUniformMat4f("u_Proj", proj);
             renderer.draw(lightVa, ib, lightShader);
             // ******************************************************************************
 
@@ -225,6 +243,14 @@ int main()
             ImGui::Text("GL version: %s", gl_version);
             ImGui::Text("Zoom: %.0f", camera.Zoom);
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+            ImGui::End();
+
+            ImGui::Begin("Controller");
+            ImGui::SliderInt("Shininess", &shininess, 1, 1024);
+            ImGui::SliderFloat("Ambient Strength", &ambientStrength, 0.0f, 1.0f);
+            ImGui::SliderFloat("Specular Strength", &specularStrength, 0.0f, 1.0f);
+            ImGui::ColorEdit3("Cube Color", &objectColor[0]);
+            ImGui::ColorEdit3("Light Color", &lightColor[0]);
             ImGui::End();
 
             // Render ImGui
@@ -272,6 +298,22 @@ void processInput(GLFWwindow *window)
     {
         camera.ProcessKeyboard(Camera::Movement::RIGHT, deltaTime);
     }
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+    {
+        camera.ProcessKeyboard(Camera::Movement::UP, deltaTime);
+    }
+    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+    {
+        camera.ProcessKeyboard(Camera::Movement::DOWN, deltaTime);
+    }
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+    {
+        mouse_ctr = true;
+    }
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_RELEASE)
+    {
+        mouse_ctr = false;
+    }
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
@@ -285,6 +327,10 @@ void framebuffer_size_callback([[maybe_unused]] GLFWwindow *window, int width, i
 // glfw: whenever the mouse moves, this callback is called
 void mouse_callback([[maybe_unused]] GLFWwindow *window, double xposIn, double yposIn)
 {
+    if (!mouse_ctr)
+    {
+        return;
+    }
     float xpos = static_cast<float>(xposIn);
     float ypos = static_cast<float>(yposIn);
     if (firstMouse)
@@ -303,5 +349,9 @@ void mouse_callback([[maybe_unused]] GLFWwindow *window, double xposIn, double y
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
 void scroll_callback([[maybe_unused]] GLFWwindow *window, [[maybe_unused]] double xoffset, double yoffset)
 {
+    if (!mouse_ctr)
+    {
+        return;
+    }
     camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }
