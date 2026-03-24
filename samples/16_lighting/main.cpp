@@ -23,6 +23,7 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 // Settings
 constexpr unsigned int SCR_WIDTH = 800;
 constexpr unsigned int SCR_HEIGHT = 600;
+std::string shader_path = "resource/shaders/";
 
 // Camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
@@ -33,6 +34,9 @@ bool firstMouse = true;
 // Timing
 float deltaTime = 0.0f; // time between current frame and last frame
 float lastFrame = 0.0f;
+
+// Lighting
+glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
 int main()
 {
@@ -107,58 +111,42 @@ int main()
         /* Create VBO, VIO, VAO */
         // clang-format off
         float vertices[] = {
-            -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, // 0
-             0.5f, -0.5f, -0.5f, 1.0f, 0.0f, // 1
-             0.5f,  0.5f, -0.5f, 1.0f, 1.0f, // 2
-            -0.5f,  0.5f, -0.5f, 0.0f, 1.0f, // 3
+            -0.5f, -0.5f, -0.5f, // 0
+             0.5f, -0.5f, -0.5f, // 1
+             0.5f,  0.5f, -0.5f, // 2
+            -0.5f,  0.5f, -0.5f, // 3
 
-            -0.5f, -0.5f,  0.5f, 0.0f, 0.0f, // 4
-             0.5f, -0.5f,  0.5f, 1.0f, 0.0f, // 5
-             0.5f,  0.5f,  0.5f, 1.0f, 1.0f, // 6
-            -0.5f,  0.5f,  0.5f, 0.0f, 1.0f, // 7
+            -0.5f, -0.5f,  0.5f, // 4
+             0.5f, -0.5f,  0.5f, // 5
+             0.5f,  0.5f,  0.5f, // 6
+            -0.5f,  0.5f,  0.5f, // 7
 
-            -0.5f,  0.5f,  0.5f, 1.0f, 0.0f, // 8
-            -0.5f,  0.5f, -0.5f, 1.0f, 1.0f, // 9
-            -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, // 10
-            -0.5f, -0.5f,  0.5f, 0.0f, 0.0f, // 11
+            -0.5f,  0.5f,  0.5f, // 8
+            -0.5f,  0.5f, -0.5f, // 9
+            -0.5f, -0.5f, -0.5f, // 10
+            -0.5f, -0.5f,  0.5f, // 11
 
-             0.5f,  0.5f,  0.5f, 1.0f, 0.0f, // 12
-             0.5f,  0.5f, -0.5f, 1.0f, 1.0f, // 13
-             0.5f, -0.5f, -0.5f, 0.0f, 1.0f, // 14
-             0.5f, -0.5f,  0.5f, 0.0f, 0.0f, // 15
+             0.5f,  0.5f,  0.5f, // 12
+             0.5f,  0.5f, -0.5f, // 13
+             0.5f, -0.5f, -0.5f, // 14
+             0.5f, -0.5f,  0.5f, // 15
 
-            -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, // 16
-             0.5f, -0.5f, -0.5f, 1.0f, 1.0f, // 17
-             0.5f, -0.5f,  0.5f, 1.0f, 0.0f, // 18
-            -0.5f, -0.5f,  0.5f, 0.0f, 0.0f, // 19
+            -0.5f, -0.5f, -0.5f, // 16
+             0.5f, -0.5f, -0.5f, // 17
+             0.5f, -0.5f,  0.5f, // 18
+            -0.5f, -0.5f,  0.5f, // 19
 
-            -0.5f,  0.5f, -0.5f, 0.0f, 1.0f, // 20 
-             0.5f,  0.5f, -0.5f, 1.0f, 1.0f, // 21 
-             0.5f,  0.5f,  0.5f, 1.0f, 0.0f, // 22 
-            -0.5f,  0.5f,  0.5f, 0.0f, 0.0f  // 23
-        };
-        glm::vec3 cubePositions[] = {
-            glm::vec3( 0.0f,  0.0f,   0.0f),
-            glm::vec3( 2.0f,  5.0f, -15.0f),
-            glm::vec3(-1.5f, -2.2f,  -2.5f),
-            glm::vec3(-3.8f, -2.0f, -12.3f),
-            glm::vec3( 2.4f, -0.4f,  -3.5f),
-            glm::vec3(-1.7f,  3.0f,  -7.5f),
-            glm::vec3( 1.3f, -2.0f,  -2.5f),
-            glm::vec3( 1.5f,  2.0f,  -2.5f),
-            glm::vec3( 1.5f,  0.2f,  -1.5f),
-            glm::vec3(-1.3f,  1.0f,  -1.5f)
+            -0.5f,  0.5f, -0.5f, // 20
+             0.5f,  0.5f, -0.5f, // 21
+             0.5f,  0.5f,  0.5f, // 22
+            -0.5f,  0.5f,  0.5f, // 23
         };
         // clang-format on
 
-        VertexArrary va;
         VertexBuffer vb(vertices, sizeof(vertices));
         VertexBufferLayout layout;
         layout.push<float>(3); // XYZ
-        layout.push<float>(2); // UV
-        va.addBuffer(vb, layout);
 
-        /* Generate index */
         unsigned int indices[36];
         unsigned int offset = 0;
         for (unsigned int i = 0; i < 36; i += 6)
@@ -173,33 +161,21 @@ int main()
         }
         IndexBuffer ib(indices, sizeof(indices));
 
-        /* Create shader */
-        std::string shader_path = "resource/shaders/";
-        Shader shader({
-            {  GL_VERTEX_SHADER,   shader_path + "merge_vertex.glsl"},
-            {GL_FRAGMENT_SHADER, shader_path + "merge_fragment.glsl"}
+        /* Create object and shader */
+        VertexArrary cubeVa;
+        cubeVa.addBuffer(vb, layout);
+        Shader cubeShader({
+            {  GL_VERTEX_SHADER,   shader_path + "object_vertex.glsl"},
+            {GL_FRAGMENT_SHADER, shader_path + "object_fragment.glsl"}
         });
-        shader.bind();
 
-        /* Create texture */
-        std::string texture_path = "resource/textures/";
-        std::vector<std::string> texture_names = {"thinking_face.png", "southeast.png"};
-        size_t texture_num = texture_names.size();
-        std::vector<Texture> textures;
-        textures.reserve(texture_num);
-        for (unsigned int i = 0; i < texture_num; ++i)
-        {
-            textures.emplace_back(texture_path + texture_names[i]);
-            textures.back().bind(i);
-        }
-
-        /* Uniform */
-        int samplers[2] = {0, 1};
-        shader.setUniform1iv("u_Textures", 2, samplers);
-
-        vb.unbind();
-        va.unbind();
-        shader.unbind();
+        /* Create light and shader */
+        VertexArrary lightVa;
+        lightVa.addBuffer(vb, layout);
+        Shader lightShader({
+            {  GL_VERTEX_SHADER,   shader_path + "light_vertex.glsl"},
+            {GL_FRAGMENT_SHADER, shader_path + "light_fragment.glsl"}
+        });
         // ******************************************************************************
 
         // ---------- Main Loop ----------
@@ -222,32 +198,26 @@ int main()
             ImGui_ImplOpenGL3_NewFrame();
             ImGui::NewFrame();
 
-            shader.bind();
-
             // ******************************************************************************
-            /* Rebinding is required, ImGui may modify the state of the texture unit */
-            for (unsigned int i = 0; i < texture_num; ++i)
-            {
-                textures[i].bind(i);
-            }
-
-            glm::mat4 transform = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-            transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
-            transform = glm::rotate(transform, currentFrame, glm::vec3(0.0f, 0.0f, 1.0f));
             glm::mat4 proj =
                 glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
             glm::mat4 view = camera.GetViewMatrix();
 
-            for (unsigned int i = 0; i < 10; i++)
-            {
-                glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-                model = glm::translate(model, cubePositions[i]);
-                float angle = 20.0f * i;
-                model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-                glm::mat4 mvp = proj * view * model * transform;
-                shader.setUniformMat4f("u_MVP", mvp);
-                renderer.draw(va, ib, shader);
-            }
+            cubeShader.bind();
+            cubeShader.setUniform3f("u_objectColor", 1.0f, 0.5f, 0.31f);
+            cubeShader.setUniform3f("u_lightColor", 1.0f, 1.0f, 1.0f);
+            glm::mat4 cubeModel = glm::mat4(1.0f);
+            glm::mat4 cubeMvp = proj * view * cubeModel;
+            cubeShader.setUniformMat4f("u_MVP", cubeMvp);
+            renderer.draw(cubeVa, ib, cubeShader);
+
+            lightShader.bind();
+            glm::mat4 lightModel = glm::mat4(1.0f);
+            lightModel = glm::translate(lightModel, lightPos);
+            lightModel = glm::scale(lightModel, glm::vec3(0.2f));
+            glm::mat4 lightMvp = proj * view * lightModel;
+            lightShader.setUniformMat4f("u_MVP", lightMvp);
+            renderer.draw(lightVa, ib, lightShader);
             // ******************************************************************************
 
             // UI
