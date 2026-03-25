@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 
 #include <array>
+#include <stdexcept>
 #include <string_view>
 
 struct Material
@@ -30,6 +31,7 @@ struct constexpr_map
                 return p.second;
             }
         }
+        throw std::out_of_range("constexpr_map::at: key not found");
     }
 };
 
