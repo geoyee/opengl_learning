@@ -86,6 +86,7 @@ int main()
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
     ImGui::StyleColorsDark();
     ImGuiStyle& style = ImGui::GetStyle();
@@ -98,6 +99,13 @@ int main()
     io.ConfigDpiScaleFonts = true;
     io.ConfigDpiScaleViewports = true;
 #endif // GLFW_VERSION_MAJOR >= 3 && GLFW_VERSION_MINOR >= 3
+
+    // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
+        style.WindowRounding = 0.0f;
+        style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+    }
 
     // Backend initialization
     ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -309,6 +317,14 @@ int main()
 
             // Render ImGui
             ImGui::Render();
+
+            if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+            {
+                GLFWwindow *backup_current_context = glfwGetCurrentContext();
+                ImGui::UpdatePlatformWindows();
+                ImGui::RenderPlatformWindowsDefault();
+                glfwMakeContextCurrent(backup_current_context);
+            }
 
             // OpenGL rendering
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
