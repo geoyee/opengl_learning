@@ -22,6 +22,9 @@ add_definitions(-DSTB_IMAGE_IMPLEMENTATION)
 set(GLM_BUILD_LIBRARY
     OFF
     CACHE BOOL "Build dynamic/static library")
+set(GLM_ENABLE_CXX_17
+    ON
+    CACHE BOOL "Enable C++ 17")
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/3rd/glm)
 
 use_imgui_with_opengl3_glfw(IMGUI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rd/imgui)

@@ -3,6 +3,7 @@
 #include "vertex_buffer.h"
 #include "renderer.h"
 #include "texture.h"
+#include "material.hpp"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -171,6 +172,13 @@ int main()
             {GL_FRAGMENT_SHADER, shader_path + "object_fragment.glsl"}
         });
 
+        VertexArrary cubeMaterialVa;
+        cubeMaterialVa.addBuffer(vb, layout);
+        Shader cubeMaterialShader({
+            {  GL_VERTEX_SHADER,     shader_path + "object_vertex.glsl"},
+            {GL_FRAGMENT_SHADER, shader_path + "material_fragment.glsl"}
+        });
+
         /* Create light and shader */
         VertexArrary lightVa;
         lightVa.addBuffer(vb, layout);
@@ -186,9 +194,13 @@ int main()
 
         float ambientStrength = 0.1f;
         float specularStrength = 0.5f;
-        int shininess = 32;
+        float shininess = 32.0f;
         glm::vec3 objectColor(1.0f, 0.5f, 0.31f);
         glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
+
+        int currentMaterialIndex = 0;
+        const auto& materials = g_materialMap.data;
+        auto material = materials[currentMaterialIndex].second;
 
         while (!glfwWindowShouldClose(window))
         {
@@ -207,12 +219,14 @@ int main()
             ImGui::NewFrame();
 
             // ******************************************************************************
-            glm::mat4 proj =
-                glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+            glm::mat4 proj = glm::perspective(glm::radians(camera.Zoom),
+                                              static_cast<float>(SCR_WIDTH) / static_cast<float>(SCR_HEIGHT),
+                                              0.1f,
+                                              100.0f);
             glm::mat4 view = camera.GetViewMatrix();
 
-            lightPos.x = 1.0f + (float)std::sin(glfwGetTime()) * 2.0f;
-            lightPos.y = (float)std::sin(glfwGetTime() / 2.0f) * 1.0f;
+            lightPos.x = 1.0f + static_cast<float>(std::sin(glfwGetTime())) * 2.0f;
+            lightPos.y = static_cast<float>(std::sin(glfwGetTime() / 2.0f)) * 1.0f;
 
             cubeShader.bind();
             cubeShader.setUniform3f("u_ObjectColor", objectColor);
@@ -221,12 +235,32 @@ int main()
             cubeShader.setUniform3f("u_ViewPos", camera.Position);
             cubeShader.setUniform1f("u_AmbientStrength", ambientStrength);
             cubeShader.setUniform1f("u_SpecularStrength", specularStrength);
-            cubeShader.setUniform1i("u_Shininess", shininess);
+            cubeShader.setUniform1f("u_Shininess", shininess);
             glm::mat4 cubeModel = glm::mat4(1.0f);
             cubeShader.setUniformMat4f("u_Model", cubeModel);
             cubeShader.setUniformMat4f("u_View", view);
             cubeShader.setUniformMat4f("u_Proj", proj);
             renderer.draw(cubeVa, ib, cubeShader);
+
+            cubeMaterialShader.bind();
+            glm::vec3 diffuseColor = lightColor * glm::vec3(0.6f);
+            glm::vec3 ambientColor = diffuseColor * glm::vec3(0.36f);
+            material = materials[currentMaterialIndex].second;
+            cubeMaterialShader.setUniform3f("u_ViewPos", camera.Position);
+            cubeMaterialShader.setUniform3f("u_Light.position", lightPos);
+            cubeMaterialShader.setUniform3f("u_Light.ambient", ambientColor);
+            cubeMaterialShader.setUniform3f("u_Light.diffuse", diffuseColor);
+            cubeMaterialShader.setUniform3f("u_Light.specular", lightColor);
+            cubeMaterialShader.setUniform3f("u_Material.ambient", material.ambient);
+            cubeMaterialShader.setUniform3f("u_Material.diffuse", material.diffuse);
+            cubeMaterialShader.setUniform3f("u_Material.specular", material.specular);
+            cubeMaterialShader.setUniform1f("u_Material.shininess", material.shininess * 128.0f);
+            glm::mat4 cubeMaterialModel = glm::mat4(1.0f);
+            cubeMaterialModel = glm::translate(cubeMaterialModel, glm::vec3(2.0f, 0.0f, 0.0f));
+            cubeMaterialShader.setUniformMat4f("u_Model", cubeMaterialModel);
+            cubeMaterialShader.setUniformMat4f("u_View", view);
+            cubeMaterialShader.setUniformMat4f("u_Proj", proj);
+            renderer.draw(cubeMaterialVa, ib, cubeMaterialShader);
 
             lightShader.bind();
             glm::mat4 lightModel = glm::mat4(1.0f);
@@ -246,11 +280,31 @@ int main()
             ImGui::End();
 
             ImGui::Begin("Controller");
-            ImGui::SliderInt("Shininess", &shininess, 1, 1024);
+            ImGui::SliderFloat("Shininess", &shininess, 0.1f, 1024.0f);
             ImGui::SliderFloat("Ambient Strength", &ambientStrength, 0.0f, 1.0f);
             ImGui::SliderFloat("Specular Strength", &specularStrength, 0.0f, 1.0f);
             ImGui::ColorEdit3("Cube Color", &objectColor[0]);
             ImGui::ColorEdit3("Light Color", &lightColor[0]);
+            if (ImGui::BeginCombo("Material", materials[currentMaterialIndex].first.data()))
+            {
+                for (int i = 0; i < materials.size(); ++i)
+                {
+                    if (materials[i].first.empty())
+                    {
+                        continue;
+                    }
+                    bool isSelected = (currentMaterialIndex == i);
+                    if (ImGui::Selectable(materials[i].first.data(), isSelected))
+                    {
+                        currentMaterialIndex = i;
+                    }
+                    if (isSelected)
+                    {
+                        ImGui::SetItemDefaultFocus();
+                    }
+                }
+                ImGui::EndCombo();
+            }
             ImGui::End();
 
             // Render ImGui

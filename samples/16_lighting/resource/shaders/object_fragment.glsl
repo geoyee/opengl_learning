@@ -11,7 +11,7 @@ uniform vec3 u_LightPos;
 uniform vec3 u_ViewPos;
 uniform float u_AmbientStrength;
 uniform float u_SpecularStrength;
-uniform int u_Shininess;
+uniform float u_Shininess;
 
 void main()
 {
