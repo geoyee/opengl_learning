@@ -25,6 +25,7 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 constexpr unsigned int SCR_WIDTH = 1200;
 constexpr unsigned int SCR_HEIGHT = 900;
 std::string shader_path = "resource/shaders/";
+std::string texture_path = "resource/textures/";
 bool mouse_ctr = true;
 
 // Camera
@@ -38,7 +39,7 @@ float deltaTime = 0.0f; // time between current frame and last frame
 float lastFrame = 0.0f;
 
 // Lighting
-glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+glm::vec3 lightPos(2.0f, 1.0f, 2.0f);
 
 int main()
 {
@@ -121,35 +122,35 @@ int main()
         /* Create VBO, VIO, VAO */
         // clang-format off
         float vertices[] = {
-            -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, // 0
-             0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, // 1
-             0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, // 2
-            -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, // 3
+            -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // 0
+             0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f, // 1
+             0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // 2
+            -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f, // 3
 
-            -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, // 4
-             0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, // 5
-             0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, // 6
-            -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, // 7
+            -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // 4
+             0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f, // 5
+             0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // 6
+            -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, // 7
 
-            -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, // 8
-            -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f, // 9
-            -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, // 10
-            -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f, // 11
+            -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // 8
+            -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // 9
+            -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // 10
+            -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // 11
 
-             0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, // 12
-             0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f, // 13
-             0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, // 14
-             0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f, // 15
+             0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // 12
+             0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // 13
+             0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // 14
+             0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // 15
 
-            -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, // 16
-             0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, // 17
-             0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, // 18
-            -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, // 19
+            -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f, // 16
+             0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // 17
+             0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f, // 18
+            -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // 19
 
-            -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, // 20
-             0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, // 21
-             0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, // 22
-            -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, // 23
+            -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f, // 20
+             0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // 21
+             0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f, // 22
+            -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // 23
         };
         // clang-format on
 
@@ -157,6 +158,7 @@ int main()
         VertexBufferLayout layout;
         layout.push<float>(3); // XYZ
         layout.push<float>(3); // Normal
+        layout.push<float>(2); // UV
 
         unsigned int indices[36];
         unsigned int offset = 0;
@@ -186,6 +188,23 @@ int main()
             {  GL_VERTEX_SHADER,     shader_path + "object_vertex.glsl"},
             {GL_FRAGMENT_SHADER, shader_path + "material_fragment.glsl"}
         });
+
+        VertexArrary cubeLightMapVa;
+        cubeLightMapVa.addBuffer(vb, layout);
+        Shader cubeLightMapShader({
+            {  GL_VERTEX_SHADER,   shader_path + "lightmap_vertex.glsl"},
+            {GL_FRAGMENT_SHADER, shader_path + "lightmap_fragment.glsl"}
+        });
+
+        std::vector<std::string> texture_names = {"container2.png", "container2_specular.png"};
+        size_t texture_num = texture_names.size();
+        std::vector<Texture> textures;
+        textures.reserve(texture_num);
+        for (unsigned int i = 0; i < texture_num; ++i)
+        {
+            textures.emplace_back(texture_path + texture_names[i]);
+            textures.back().bind(i);
+        }
 
         /* Create light and shader */
         VertexArrary lightVa;
@@ -269,6 +288,27 @@ int main()
             cubeMaterialShader.setUniformMat4f("u_View", view);
             cubeMaterialShader.setUniformMat4f("u_Proj", proj);
             renderer.draw(cubeMaterialVa, ib, cubeMaterialShader);
+
+            for (unsigned int i = 0; i < texture_num; ++i)
+            {
+                textures[i].bind(i);
+            }
+
+            cubeLightMapShader.bind();
+            glm::mat4 cubeLightMapModel = glm::mat4(1.0f);
+            cubeLightMapShader.setUniform3f("u_ViewPos", camera.Position);
+            cubeLightMapShader.setUniform3f("u_Light.position", lightPos);
+            cubeLightMapShader.setUniform3f("u_Light.ambient", ambientColor);
+            cubeLightMapShader.setUniform3f("u_Light.diffuse", diffuseColor);
+            cubeLightMapShader.setUniform3f("u_Light.specular", lightColor);
+            cubeLightMapShader.setUniform1i("u_Material.diffuse", 0);
+            cubeLightMapShader.setUniform1i("u_Material.specular", 1);
+            cubeLightMapShader.setUniform1f("u_Material.shininess", shininess);
+            cubeLightMapModel = glm::translate(cubeLightMapModel, glm::vec3(4.0f, 0.0f, 0.0f));
+            cubeLightMapShader.setUniformMat4f("u_Model", cubeLightMapModel);
+            cubeLightMapShader.setUniformMat4f("u_View", view);
+            cubeLightMapShader.setUniformMat4f("u_Proj", proj);
+            renderer.draw(cubeLightMapVa, ib, cubeLightMapShader);
 
             lightShader.bind();
             glm::mat4 lightModel = glm::mat4(1.0f);
