@@ -29,7 +29,7 @@ std::string texture_path = "resource/textures/";
 bool mouse_ctr = true;
 
 // Camera
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+Camera camera(glm::vec3(3.0f, 0.0f, 7.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -39,7 +39,7 @@ float deltaTime = 0.0f; // time between current frame and last frame
 float lastFrame = 0.0f;
 
 // Lighting
-glm::vec3 lightPos(2.0f, 1.0f, 2.0f);
+glm::vec3 lightPos(3.0f, 1.0f, 2.0f);
 
 int main()
 {
@@ -196,6 +196,13 @@ int main()
             {GL_FRAGMENT_SHADER, shader_path + "lightmap_fragment.glsl"}
         });
 
+        VertexArrary cubeLightCasterVa;
+        cubeLightCasterVa.addBuffer(vb, layout);
+        Shader cubeLightCasterShader({
+            {  GL_VERTEX_SHADER,      shader_path + "lightmap_vertex.glsl"},
+            {GL_FRAGMENT_SHADER, shader_path + "lightcaster_fragment.glsl"}
+        });
+
         std::vector<std::string> texture_names = {"container2.png", "container2_specular.png"};
         size_t texture_num = texture_names.size();
         std::vector<Texture> textures;
@@ -252,8 +259,8 @@ int main()
                                               100.0f);
             glm::mat4 view = camera.GetViewMatrix();
 
-            lightPos.x = 1.0f + static_cast<float>(std::sin(glfwGetTime())) * 2.0f;
-            lightPos.y = static_cast<float>(std::sin(glfwGetTime() / 2.0f)) * 1.0f;
+            lightPos.x = 1.0f + (1.0f + static_cast<float>(std::sin(glfwGetTime())) * 2.0f) * 2.0f;
+            lightPos.y = (static_cast<float>(std::sin(glfwGetTime() / 2.0f)) * 1.0f);
 
             cubeShader.bind();
             cubeShader.setUniform3f("u_ObjectColor", objectColor);
@@ -309,6 +316,39 @@ int main()
             cubeLightMapShader.setUniformMat4f("u_View", view);
             cubeLightMapShader.setUniformMat4f("u_Proj", proj);
             renderer.draw(cubeLightMapVa, ib, cubeLightMapShader);
+
+            cubeLightCasterShader.bind();
+            glm::mat4 cubeLightCasterModel = glm::mat4(1.0f);
+            cubeLightCasterShader.setUniform3f("u_ViewPos", camera.Position);
+            cubeLightCasterShader.setUniform3f("u_DLight.direction", -0.2f, -1.0f, -0.3f);
+            cubeLightCasterShader.setUniform3f("u_DLight.ambient", ambientColor);
+            cubeLightCasterShader.setUniform3f("u_DLight.diffuse", diffuseColor);
+            cubeLightCasterShader.setUniform3f("u_DLight.specular", lightColor);
+            cubeLightCasterShader.setUniform3f("u_PLight.position", lightPos);
+            cubeLightCasterShader.setUniform3f("u_PLight.ambient", ambientColor);
+            cubeLightCasterShader.setUniform3f("u_PLight.diffuse", diffuseColor);
+            cubeLightCasterShader.setUniform3f("u_PLight.specular", lightColor);
+            cubeLightCasterShader.setUniform1f("u_PLight.constant", 1.0f);
+            cubeLightCasterShader.setUniform1f("u_PLight.linear", 0.09f);
+            cubeLightCasterShader.setUniform1f("u_PLight.quadratic", 0.032f);
+            cubeLightCasterShader.setUniform3f("u_SLight.position", lightPos);
+            cubeLightCasterShader.setUniform3f("u_SLight.ambient", ambientColor);
+            cubeLightCasterShader.setUniform3f("u_SLight.diffuse", diffuseColor);
+            cubeLightCasterShader.setUniform3f("u_SLight.specular", lightColor);
+            cubeLightCasterShader.setUniform1f("u_SLight.constant", 1.0f);
+            cubeLightCasterShader.setUniform1f("u_SLight.linear", 0.09f);
+            cubeLightCasterShader.setUniform1f("u_SLight.quadratic", 0.032f);
+            cubeLightCasterShader.setUniform3f("u_SLight.position", camera.Position);
+            cubeLightCasterShader.setUniform3f("u_SLight.direction", camera.Front);
+            cubeLightCasterShader.setUniform1f("u_SLight.cutOff", glm::cos(glm::radians(12.5f)));
+            cubeLightCasterShader.setUniform1i("u_Material.diffuse", 0);
+            cubeLightCasterShader.setUniform1i("u_Material.specular", 1);
+            cubeLightCasterShader.setUniform1f("u_Material.shininess", shininess);
+            cubeLightCasterModel = glm::translate(cubeLightCasterModel, glm::vec3(6.0f, 0.0f, 0.0f));
+            cubeLightCasterShader.setUniformMat4f("u_Model", cubeLightCasterModel);
+            cubeLightCasterShader.setUniformMat4f("u_View", view);
+            cubeLightCasterShader.setUniformMat4f("u_Proj", proj);
+            renderer.draw(cubeLightCasterVa, ib, cubeLightCasterShader);
 
             lightShader.bind();
             glm::mat4 lightModel = glm::mat4(1.0f);
