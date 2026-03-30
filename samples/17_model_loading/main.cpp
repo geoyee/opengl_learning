@@ -1,8 +1,7 @@
 #include "camera.h"
 #include "error.h"
-#include "vertex_buffer.h"
-#include "renderer.h"
-#include "texture.h"
+#include "model.h"
+#include "shader.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -12,9 +11,6 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
 
 #include <iostream>
 
@@ -27,11 +23,11 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 constexpr unsigned int SCR_WIDTH = 1200;
 constexpr unsigned int SCR_HEIGHT = 900;
 std::string shader_path = "resource/shaders/";
-std::string texture_path = "resource/textures/";
+std::string model_path = "resource/models/";
 bool mouse_ctr = true;
 
 // Camera
-Camera camera(glm::vec3(3.0f, 0.0f, 7.0f));
+Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -113,7 +109,17 @@ int main()
 
     {
         // ******************************************************************************
-        // TODO: Implement
+        /* Setting */
+        GLCALL(glEnable(GL_DEPTH_TEST));
+        GLCALL(glEnable(GL_BLEND));
+        GLCALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+
+        /* Load model and shader */
+        Model obj(model_path + "backpack/backpack.obj");
+        Shader shader({
+            {  GL_VERTEX_SHADER,   shader_path + "model_vertex.glsl"},
+            {GL_FRAGMENT_SHADER, shader_path + "model_fragment.glsl"}
+        });
         // ******************************************************************************
 
         // ---------- Main Loop ----------
@@ -137,7 +143,19 @@ int main()
             ImGui::NewFrame();
 
             // ******************************************************************************
-            // TODO: Implement
+            shader.bind();
+
+            glm::mat4 proj =
+                glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+            glm::mat4 view = camera.GetViewMatrix();
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+            model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+            shader.setUniformMat4f("u_Model", model);
+            shader.setUniformMat4f("u_View", view);
+            shader.setUniformMat4f("u_Proj", proj);
+
+            obj.draw(renderer, shader);
             // ******************************************************************************
 
             // UI

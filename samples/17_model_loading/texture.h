@@ -16,6 +16,7 @@ public:
 
     int getWidth() const;
     int getHeight() const;
+    bool isValid() const { return m_renderID != 0; }
 
 private:
     unsigned int m_renderID;

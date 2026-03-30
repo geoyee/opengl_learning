@@ -3,6 +3,21 @@
 
 #pragma warning(disable : 4312)
 
+static unsigned int getSizeOfType(unsigned int type)
+{
+    switch (type)
+    {
+        case GL_FLOAT :
+            return sizeof(GLfloat);
+        case GL_UNSIGNED_INT :
+            return sizeof(GLuint);
+        case GL_UNSIGNED_BYTE :
+            return sizeof(GLubyte);
+        default :
+            return 0;
+    }
+}
+
 VertexArrary::VertexArrary()
 {
     GLCALL(glGenVertexArrays(1, &m_renderID));
@@ -40,6 +55,6 @@ void VertexArrary::addBuffer(const VertexBuffer& vb, const VertexBufferLayout& l
                                      element.normalized,
                                      layout.getStride(),
                                      reinterpret_cast<const void *>(offset)));
-        offset += element.count * sizeof(element.type);
+        offset += element.count * getSizeOfType(element.type);
     }
 }

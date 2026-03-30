@@ -4,7 +4,9 @@
 
 Model::Model(const std::string& path)
 {
+    std::cout << "Loading model from: " << path << std::endl;
     loadModel(path);
+    std::cout << "Model loaded, meshes count: " << m_meshes.size() << std::endl;
 }
 
 void Model::draw(Renderer& renderer, Shader& shader)
@@ -25,7 +27,8 @@ void Model::loadModel(const std::string& path)
         std::cerr << "ERROR::ASSIMP::" << import.GetErrorString() << std::endl;
         return;
     }
-    m_directory = path.substr(0, path.find_last_of('/'));
+    size_t lastSlash = path.find_last_of("/\\");
+    m_directory = path.substr(0, lastSlash);
     processNode(scene->mRootNode, scene);
 }
 
@@ -89,11 +92,11 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
     if (mesh->mMaterialIndex >= 0)
     {
         aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
-        // 1. Diffuse maps
-        auto diffuseMaps = this->loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+        // Diffuse maps
+        auto diffuseMaps = this->loadMaterialTextures(material, aiTextureType_DIFFUSE, "u_TextureDiffuse");
         textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-        // 2. Specular maps
-        auto specularMaps = this->loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+        // Specular maps
+        auto specularMaps = this->loadMaterialTextures(material, aiTextureType_SPECULAR, "u_TextureSpecular");
         textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
     }
 
@@ -110,7 +113,9 @@ std::vector<std::pair<std::string, std::string>> Model::loadMaterialTextures(aiM
     {
         aiString str;
         mat->GetTexture(type, i, &str);
-        textures.push_back(std::make_pair(typeName, std::string(str.C_Str()) + "/" + m_directory));
+        std::string texturePath = m_directory + "/" + std::string(str.C_Str());
+        std::cout << "Loading texture: " << texturePath << std::endl;
+        textures.push_back(std::make_pair(typeName + "_" + std::to_string(i), texturePath));
     }
     return textures;
 }

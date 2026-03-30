@@ -3,6 +3,8 @@
 
 #include <stb_image.h>
 
+#include <iostream>
+
 Texture::Texture(const std::string& path)
     : m_renderID(0)
     , m_filePath(path)
@@ -16,6 +18,11 @@ Texture::Texture(const std::string& path)
     stbi_set_flip_vertically_on_load(1);
 
     m_localBuffer = stbi_load(path.c_str(), &m_width, &m_height, &m_BPP, 4 /*RGBA*/);
+    if (!m_localBuffer)
+    {
+        std::cerr << "ERROR::TEXTURE::Failed to load texture: " << path << std::endl;
+        return;
+    }
 
     GLCALL(glGenTextures(1, &m_renderID));
     GLCALL(glBindTexture(GL_TEXTURE_2D, m_renderID));
@@ -34,6 +41,7 @@ Texture::Texture(const std::string& path)
     if (m_localBuffer)
     {
         stbi_image_free(m_localBuffer);
+        m_localBuffer = nullptr;
     }
 }
 

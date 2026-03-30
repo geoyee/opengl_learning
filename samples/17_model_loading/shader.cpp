@@ -16,6 +16,7 @@ std::string ParseShader(const std::string& file)
     std::ostringstream oss;
     if (!fs.is_open())
     {
+        std::cerr << "ERROR::SHADER::Failed to open file: " << file << std::endl;
         return "";
     }
     oss << fs.rdbuf();
@@ -363,12 +364,27 @@ unsigned int Shader::CreateShader(const ShaderFiles& file_path_and_types)
     for (const auto& ft : file_path_and_types)
     {
         unsigned int tmp = CompilerShader(ft.first, ParseShader(ft.second));
+        if (tmp == 0)
+        {
+            std::cerr << "ERROR::SHADER::Failed to compile shader from: " << ft.second << std::endl;
+        }
         GLCALL(glAttachShader(program, tmp));
         shaders.push_back(tmp);
     }
     GLCALL(glLinkProgram(program));
+
+    int linkStatus;
+    GLCALL(glGetProgramiv(program, GL_LINK_STATUS, &linkStatus));
+    if (linkStatus == GL_FALSE)
+    {
+        int len;
+        GLCALL(glGetProgramiv(program, GL_INFO_LOG_LENGTH, &len));
+        std::vector<char> msg(len);
+        GLCALL(glGetProgramInfoLog(program, len, &len, msg.data()));
+        std::cerr << "ERROR::SHADER::Program link failed: " << reinterpret_cast<char const *>(msg.data()) << std::endl;
+    }
+
     GLCALL(glValidateProgram(program));
-    /* Generally not deleted, for ease of debugging and suchlike */
     for (auto& shader : shaders)
     {
         GLCALL(glDeleteShader(shader));

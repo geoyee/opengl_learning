@@ -6,12 +6,14 @@
 #include "index_buffer.h"
 #include "renderer.h"
 #include "shader.h"
+#include "texture.h"
 #include "vertex_array.h"
 #include "vertex_buffer.h"
 
 #include <glm/glm.hpp>
 
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -28,6 +30,12 @@ public:
     Mesh(const std::vector<Vertex>& vertices,
          const std::vector<unsigned int>& indices,
          const std::vector<std::pair<std::string, std::string>>& textures);
+    ~Mesh() = default;
+    Mesh(const Mesh&) = delete;
+    Mesh& operator=(const Mesh&) = delete;
+    Mesh(Mesh&&) = default;
+    Mesh& operator=(Mesh&&) = default;
+
     void draw(Renderer& renderer, Shader& shader);
 
 private:
@@ -36,7 +44,7 @@ private:
     VertexArrary m_vao;
     VertexBuffer m_vbo;
     IndexBuffer m_ebo;
-    std::map<std::string, Texture> m_texs;
+    std::map<std::string, std::unique_ptr<Texture>> m_texs;
 };
 
 #endif // !__MESH_H__
