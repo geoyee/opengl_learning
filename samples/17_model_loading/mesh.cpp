@@ -5,8 +5,9 @@
 Mesh::Mesh(const std::vector<Vertex>& vertices,
            const std::vector<unsigned int>& indices,
            const std::vector<std::pair<std::string, std::string>>& textures)
-    : m_vbo(vertices.data(), static_cast<unsigned int>(vertices.size() * sizeof(Vertex)))
-    , m_ebo(indices.data(), static_cast<unsigned int>(indices.size()))
+    : m_vao(new VertexArrary())
+    , m_vbo(new VertexBuffer(vertices.data(), static_cast<unsigned int>(vertices.size() * sizeof(Vertex))))
+    , m_ebo(new IndexBuffer(indices.data(), static_cast<unsigned int>(indices.size())))
     , m_texs({})
 {
     std::cout << "Creating mesh: " << vertices.size() << " vertices, " << indices.size() << " indices, "
@@ -20,17 +21,17 @@ void Mesh::setupMesh(const std::vector<std::pair<std::string, std::string>>& tex
     layout.push<float>(3);
     layout.push<float>(3);
     layout.push<float>(2);
-    m_vao.addBuffer(m_vbo, layout);
-    m_vao.unbind();
+    m_vao->addBuffer(*m_vbo, layout);
+    m_vao->unbind();
 
     size_t textureNum = textures.size();
     for (unsigned int i = 0; i < textureNum; ++i)
     {
-        auto tex = std::make_unique<Texture>(textures[i].second);
+        auto tex = new Texture(textures[i].second);
         if (tex->isValid())
         {
             tex->bind(i);
-            m_texs.emplace(textures[i].first, std::move(tex));
+            m_texs.emplace(textures[i].first, tex);
         }
         else
         {
@@ -52,5 +53,5 @@ void Mesh::draw(Renderer& renderer, Shader& shader)
         }
     }
 
-    renderer.draw(m_vao, m_ebo, shader);
+    renderer.draw(*m_vao, *m_ebo, shader);
 }

@@ -61,6 +61,11 @@ void Texture::unbind() const
     GLCALL(glBindTexture(GL_TEXTURE_2D, 0));
 }
 
+const std::string& Texture::getPath() const
+{
+    return m_filePath;
+}
+
 int Texture::getWidth() const
 {
     return m_width;
@@ -69,4 +74,9 @@ int Texture::getWidth() const
 int Texture::getHeight() const
 {
     return m_height;
+}
+
+bool Texture::isValid() const
+{
+    return m_renderID != 0;
 }

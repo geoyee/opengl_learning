@@ -30,7 +30,6 @@ public:
     Mesh(const std::vector<Vertex>& vertices,
          const std::vector<unsigned int>& indices,
          const std::vector<std::pair<std::string, std::string>>& textures);
-    ~Mesh() = default;
     Mesh(const Mesh&) = delete;
     Mesh& operator=(const Mesh&) = delete;
     Mesh(Mesh&&) = default;
@@ -41,10 +40,10 @@ public:
 private:
     void setupMesh(const std::vector<std::pair<std::string, std::string>>& textures);
 
-    VertexArrary m_vao;
-    VertexBuffer m_vbo;
-    IndexBuffer m_ebo;
-    std::map<std::string, std::unique_ptr<Texture>> m_texs;
+    VertexArrary *m_vao;
+    VertexBuffer *m_vbo;
+    IndexBuffer *m_ebo;
+    std::map<std::string, Texture *> m_texs;
 };
 
 #endif // !__MESH_H__

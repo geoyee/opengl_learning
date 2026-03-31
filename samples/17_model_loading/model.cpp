@@ -14,7 +14,7 @@ void Model::draw(Renderer& renderer, Shader& shader)
     size_t mesheSize = m_meshes.size();
     for (unsigned int i = 0; i < mesheSize; ++i)
     {
-        m_meshes[i].draw(renderer, shader);
+        m_meshes[i]->draw(renderer, shader);
     }
 }
 
@@ -45,7 +45,7 @@ void Model::processNode(aiNode *node, const aiScene *scene)
     }
 }
 
-Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
+Mesh *Model::processMesh(aiMesh *mesh, const aiScene *scene)
 {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
@@ -101,7 +101,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
     }
 
     // Return a mesh object created from the extracted mesh data
-    return Mesh(vertices, indices, textures);
+    return new Mesh(vertices, indices, textures);
 }
 
 std::vector<std::pair<std::string, std::string>> Model::loadMaterialTextures(aiMaterial *mat,

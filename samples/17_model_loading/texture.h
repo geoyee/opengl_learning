@@ -14,9 +14,10 @@ public:
     void bind(unsigned int slot = 0) const;
     void unbind() const;
 
+    const std::string& getPath() const;
     int getWidth() const;
     int getHeight() const;
-    bool isValid() const { return m_renderID != 0; }
+    bool isValid() const;
 
 private:
     unsigned int m_renderID;
