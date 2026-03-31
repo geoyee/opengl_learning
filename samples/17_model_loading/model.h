@@ -17,6 +17,7 @@ public:
     Model& operator=(const Model&) = delete;
     Model(Model&&) = default;
     Model& operator=(Model&&) = default;
+    ~Model();
 
     void draw(Renderer& renderer, Shader& shader);
 

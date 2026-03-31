@@ -34,6 +34,7 @@ public:
     Mesh& operator=(const Mesh&) = delete;
     Mesh(Mesh&&) = default;
     Mesh& operator=(Mesh&&) = default;
+    ~Mesh();
 
     void draw(Renderer& renderer, Shader& shader);
 
@@ -43,7 +44,7 @@ private:
     VertexArrary *m_vao;
     VertexBuffer *m_vbo;
     IndexBuffer *m_ebo;
-    std::map<std::string, Texture *> m_texs;
+    std::map<std::string, std::shared_ptr<Texture>> m_texs;
 };
 
 #endif // !__MESH_H__

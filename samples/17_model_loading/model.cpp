@@ -9,6 +9,15 @@ Model::Model(const std::string& path)
     std::cout << "Model loaded, meshes count: " << m_meshes.size() << std::endl;
 }
 
+Model::~Model()
+{
+    for (auto& mesh : m_meshes)
+    {
+        delete mesh;
+    }
+    m_meshes.clear();
+}
+
 void Model::draw(Renderer& renderer, Shader& shader)
 {
     size_t mesheSize = m_meshes.size();

@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+static std::unordered_map<std::string, std::weak_ptr<Texture>> g_texMap{};
+
 Mesh::Mesh(const std::vector<Vertex>& vertices,
            const std::vector<unsigned int>& indices,
            const std::vector<std::pair<std::string, std::string>>& textures)
@@ -13,6 +15,16 @@ Mesh::Mesh(const std::vector<Vertex>& vertices,
     std::cout << "Creating mesh: " << vertices.size() << " vertices, " << indices.size() << " indices, "
               << textures.size() << " textures" << std::endl;
     setupMesh(textures);
+}
+
+Mesh::~Mesh()
+{
+    delete m_vao;
+    m_vao = nullptr;
+    delete m_vbo;
+    m_vbo = nullptr;
+    delete m_ebo;
+    m_ebo = nullptr;
 }
 
 void Mesh::setupMesh(const std::vector<std::pair<std::string, std::string>>& textures)
@@ -27,15 +39,24 @@ void Mesh::setupMesh(const std::vector<std::pair<std::string, std::string>>& tex
     size_t textureNum = textures.size();
     for (unsigned int i = 0; i < textureNum; ++i)
     {
-        auto tex = new Texture(textures[i].second);
-        if (tex->isValid())
+        if (g_texMap.find(textures[i].second) != g_texMap.end())
         {
-            tex->bind(i);
+            auto tex = g_texMap[textures[i].second].lock();
             m_texs.emplace(textures[i].first, tex);
         }
         else
         {
-            std::cerr << "ERROR::MESH::Failed to load texture: " << textures[i].second << std::endl;
+            auto tex = std::make_shared<Texture>(textures[i].second);
+            if (tex->isValid())
+            {
+                tex->bind(i);
+                m_texs.emplace(textures[i].first, tex);
+                g_texMap[textures[i].second] = tex;
+            }
+            else
+            {
+                std::cerr << "ERROR::MESH::Failed to load texture: " << textures[i].second << std::endl;
+            }
         }
     }
 }
