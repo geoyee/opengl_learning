@@ -63,7 +63,7 @@ foreach (entry IN LISTS sample_entries)
           POST_BUILD
           COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different ${sample_dir}/resource
                   $<TARGET_FILE_DIR:${entry}>/resource
-          COMMENT "Copying resource to output directory")
+          COMMENT "")
       endif ()
     else ()
       message(WARNING "No source files found in sample directory: ${entry}")

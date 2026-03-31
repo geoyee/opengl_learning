@@ -44,7 +44,7 @@ function (target_use_glew target)
         TARGET ${target}
         POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different "${dll_path}" $<TARGET_FILE_DIR:${target}>
-        COMMENT "Copying glew32.dll to output directory")
+        COMMENT "")
       # message(STATUS "Configured automatic copying of glew32.dll to output directory")
     else ()
       message(WARNING "glew32.dll not found: ${dll_path}, please copy manually")
